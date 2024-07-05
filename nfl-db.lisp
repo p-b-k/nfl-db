@@ -76,60 +76,108 @@
 (export 'team-division)
 (export 'team-title)
 
-; (defun get-rgb-string (c) (multiple-value-bind (r g b) (color-rgb c) (format nil "rbg:~a/~a/~a" r g b)))
+(defval matches #( 
+  ;;     TEAMS           DATE            TIME   ON
+  ;; Week 1
+  '( #( (:BAL . :KC )  #(2024  9  5)   #(10 20)  nbc)
+     #( (:GB  . :PHI)  #(2024  9  6)   #(10 15)  peacock)
+     #( (:PIT . :CAR)  #(2024  9  8)   #(13 00)  fox)
+     #( (:ARI . :BUF)  #(2024  9  8)   #(13 00)  cbs)
+     #( (:TEN . :CHI)  #(2024  9  8)   #(13 00)  fox)
+     #( (:NE  . :CIN)  #(2024  9  8)   #(13 00)  cbs)
+     #( (:HOU . :IND)  #(2024  9  8)   #(13 00)  cbs)
+     #( (:JAX . :MIA)  #(2024  9  8)   #(13 00)  cbs)
+     #( (:CAR . :NO )  #(2024  9  8)   #(13 00)  fox)
+     #( (:MIN . :NYG)  #(2024  9  8)   #(13 00)  fox)
+     #( (:LV  . :LAC)  #(2024  9  8)   #(16 05)  cbs)
+     #( (:DEN . :SEA)  #(2024  9  8)   #(16 05)  cbs)
+     #( (:DAL . :CLE)  #(2024  9  8)   #(16 25)  fox)
+     #( (:WAS . :TB )  #(2024  9  8)   #(16 25)  fox)
+     #( (:LA  . :DET)  #(2024  9  8)   #(20 20)  nbc)
+     #( (:NYJ . :SF )  #(2024  9  9)   #(20 15)  espn abc) )
 
-; (defun color-slider-value-changed (slider new-value)
-;   (with-slots (current-color-pane red green blue) *application-frame*
-;     (let ( (id (gadget-id slider)) )
-;       ;; The gadget-id symbols match the slot names in color-editor
-;       (setf (slot-value *application-frame* id) new-value)
-;       (let ( (new-color (make-rgb-color red green blue)) )
-;         (setf (pane-background current-color-pane) new-color)
-;         (setf (medium-background current-color-pane) new-color)))
-;     (redisplay-frame-pane *application-frame* current-color-pane)))
+  ;; Week 2
+  '( #( (:BUF . :MIA)  #(2024  9 12)   #(20 15)  prime)
+     #( (:LV  . :BAL)  #(2024  9 15)   #(13 00)  cbs)
+     #( (:LAC . :CAR)  #(2024  9 15)   #(13 00)  cbs)
+     #( (:NO  . :DAL)  #(2024  9 15)   #(13 00)  fox)
+     #( (:TB  . :DET)  #(2024  9 15)   #(13 00)  fox)
+     #( (:IND . :GB )  #(2024  9 15)   #(13 00)  fox)
+     #( (:CLE . :JAX)  #(2024  9 15)   #(13 00)  cbs)
+     #( (:SF  . :MIN)  #(2024  9 15)   #(13 00)  cbs)
+     #( (:SEA . :NE )  #(2024  9 15)   #(13 00)  fox)
+     #( (:NYJ . :TEN)  #(2024  9 15)   #(13 00)  cbs)
+     #( (:NYG . :WAS)  #(2024  9 15)   #(13 00)  fox)
+     #( (:LA  . :ARI)  #(2024  9 15)   #(16 05)  fox)
+     #( (:PIT . :DEN)  #(2024  9 15)   #(16 25)  cbs)
+     #( (:CIN . :KC )  #(2024  9 15)   #(16 25)  cbs)
+     #( (:CHI . :HOU)  #(2024  9 15)   #(20 20)  nbc)
+     #( (:ATL . :PHI)  #(2024  9 16)   #(20 15)  espn) )
 
-; ;; Create the slider constructor function
-; (defun make-color-slider (id initval label)
-;   (labelling
-;     (:label label)
-;     (make-pane ':slider
-;       :id id
-;       :orientation :horizontal
-;       :value initval
-;       :max-value 1
-;       :min-value 0
-;       :drag-callback #'color-slider-dragged
-;       :value-changed-callback #'color-slider-value-changed)))
+  ;; Week 3
+  '( #( (:NE  . :NYJ)  #(2024  9 19)   #(20 15)  prime)
+     #( (:NYG . :CLE)  #(2024  9 22)   #(13 00)  fox)
+     #( (:CHI . :IND)  #(2024  9 22)   #(13 00)  cbs)
+     #( (:HOU . :MIN)  #(2024  9 22)   #(13 00)  cbs)
+     #( (:PHI . :NO )  #(2024  9 22)   #(13 00)  fox)
+     #( (:LAC . :PIT)  #(2024  9 22)   #(13 00)  cbs)
+     #( (:DEN . :TB )  #(2024  9 22)   #(13 00)  fox)
+     #( (:GB  . :TEN)  #(2024  9 22)   #(13 00)  fox)
+     #( (:CAR . :LV )  #(2024  9 22)   #(13 05)  cbs)
+     #( (:MIA . :SEA)  #(2024  9 22)   #(13 05)  cbs)
+     #( (:DET . :ARI)  #(2024  9 22)   #(13 25)  fox)
+     #( (:BAL . :DAL)  #(2024  9 22)   #(13 25)  fox)
+     #( (:SF  . :LA )  #(2024  9 22)   #(13 25)  fox)
+     #( (:KC  . :ATL)  #(2024  9 22)   #(20 20)  nbc)
+     #( (:JAX . :BUF)  #(2024  9 23)   #(19 30)  espn)
+     #( (:WAS . :CIN)  #(2024  9 23)   #(20 15)  abc) )
 
-; ;; Define the main application frame
-; (define-application-frame color-editor ()
-;   ( current-color-pane
-;     drag-feedback-pane
-;     (red    :initform 0.0)
-;     (green  :initform 1.0)
-;     (blue   :initform 0.0) )
-;   (:pane (with-slots (drag-feedback-pane current-color-pane red green blue) *application-frame*
-;                      (vertically ()
-;                         (setf current-color-pane
-;                               (make-pane  'application-pane
-;                                           :min-height 100
-;                                           :max-height 100
-;                                           :background (make-rgb-color red green blue)))
-;                         (horizontally (:min-height 200 :max-height 200)
-;                                       (1/2 (make-color-slider 'red    red    "Red"))
-;                                       (1/4 (make-color-slider 'green  green  "Green"))
-;                                       (1/4 (make-color-slider 'blue   blue   "Blue")))
-;                         +fill+
-;                         (setf drag-feedback-pane
-;                               (make-pane  'application-pane
-;                                           :min-height 100
-;                                           :max-height 100
-;                                           :background (make-rgb-color red green blue))))))
-;   (:menu-bar t))
+  ;; Week 4
+  '( #( (:DAL . :NYG)  #(2024  9 26)   #(20 15)  prime)
+     #( (:NO  . :ATL)  #(2024  9 29)   #(13 00)  fox)
+     #( (:CIN . :CAR)  #(2024  9 29)   #(13 00)  fox)
+     #( (:LA  . :CHI)  #(2024  9 29)   #(13 00)  fox)
+     #( (:MIN . :GB )  #(2024  9 29)   #(13 00)  cbs)
+     #( (:JAX . :HOU)  #(2024  9 29)   #(13 00)  cbs)
+     #( (:PIT . :IND)  #(2024  9 29)   #(13 00)  cbs)
+     #( (:DEN . :NYJ)  #(2024  9 29)   #(13 00)  cbs)
+     #( (:PHI . :TB )  #(2024  9 29)   #(13 00)  fox)
+     #( (:WAS . :ARI)  #(2024  9 29)   #(16 05)  fox)
+     #( (:NE  . :SF )  #(2024  9 29)   #(16 05)  fox)
+     #( (:KC  . :LAC)  #(2024  9 29)   #(16 25)  cbs)
+     #( (:CLE . :LV )  #(2024  9 29)   #(16 25)  cbs)
+     #( (:BUF . :BAL)  #(2024  9 29)   #(20 20)  nbc)
+     #( (:TEN . :MIA)  #(2024  9 30)   #(19 30)  espn)
+     #( (:SEA . :DET)  #(2024  9 30)   #(20 15)  abc) )
 
-; (define-color-editor-command (com-quit :name "Quit" :menu t) ()
-;   (frame-exit *application-frame*))
+  ;; Week 5
+  '( #( (:TB  . :ATL)  #(2024 10  3)   #(20 15)  prime)
+     #( (:NYJ . :MIN)  #(2024 10  6)   #( 9 30)  nfl)
+     #( (:CAR . :CHI)  #(2024 10  6)   #(13 00)  fox)
+     #( (:BAL . :CIN)  #(2024 10  6)   #(13 00)  cbs)
+     #( (:BUF . :HOU)  #(2024 10  6)   #(13 00)  cbs)
+     #( (:IND . :JAX)  #(2024 10  6)   #(13 00)  cbs)
+     #( (:MIA . :NE )  #(2024 10  6)   #(13 00)  fox)
+     #( (:CLE . :WAS)  #(2024 10  6)   #(13 00)  fox)
+     #( (:LV  . :DEN)  #(2024 10  6)   #(16 05)  fox)
+     #( (:ARI . :SF )  #(2024 10  6)   #(16 05)  fox)
+     #( (:GB  . :LA )  #(2024 10  6)   #(16 25)  cbs)
+     #( (:NYG . :SEA)  #(2024 10  6)   #(16 25)  cbs)
+     #( (:DAL . :PIT)  #(2024 10  6)   #(20 2 )  nbc)
+     #( (:NO  . :KC )  #(2024 10  7)   #(20 2 )  espn) )
 
-; (defun run () (run-frame-top-level (make-application-frame 'color-editor)))
-; (export 'run)
-
+  ;; Week 6
+  '( #( (:SF  . :SEA)  #(2024 10 10)   #(20 15)  prime)
+     #( (:JAX . :CHI)  #(2024 10 13)   #( 9 30)  nfl)
+     #( (:WAS . :BAL)  #(2024 10 13)   #(13 00)  cbs)
+     #( (:ARI . :GB )  #(2024 10 13)   #(13 00)  fox)
+     #( (:HOU . :NE )  #(2024 10 13)   #(13 00)  cbs)
+     #( (:TB  . :NO )  #(2024 10 13)   #(13 00)  fox)
+     #( (:CLE . :PHI)  #(2024 10 13)   #(13 00)  fox)
+     #( (:IND . :TEN)  #(2024 10 13)   #(13 00)  cbs)
+     #( (:LAC . :DEN)  #(2024 10 13)   #(16 05)  cbs)
+     #( (:PIT . :LV )  #(2024 10 13)   #(16 05)  cbs)
+     #( (:ATL . :CAR)  #(2024 10 13)   #(16 25)  fox)
+     #( (:DET . :DAL)  #(2024 10 13)   #(16 25)  fox)
+     #( (:CIN . :NYG)  #(2024 10 13)   #(20 20)  nbc)
+     #( (:BUF . :NYJ)  #(2024 10 14)   #(20 15)  espn) )
