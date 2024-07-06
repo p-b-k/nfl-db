@@ -9,6 +9,9 @@ mkdir -p ../png
 
 for x in *.svg; do
   OUTPUT=../png/$(echo $x | sed 's/svg$/png/')
-  echo "Converting $x to $OUTPUT"
-  rsvg-convert -o $OUTPUT $x
+  for size in 32 64 128 256; do
+    OUTPUT_SIZED=$(echo $OUTPUT | sed "s/\.png$/-${size}x${size}.png/")
+    echo "Converting $x to $OUTPUT_SIZED"
+    rsvg-convert -o $OUTPUT_SIZED -w ${size} -h ${size} $x
+  done
 done

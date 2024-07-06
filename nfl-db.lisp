@@ -12,69 +12,69 @@
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 (defvar league '(
-    ( :BUF           "Buffalo"          "Bills"         afc . east )
-    ( :MIA           "Miami"            "Dolphins"      afc . east )
-    ( :NE            "New England"      "Patriots"      afc . east )
-    ( :NYJ           "New York"         "Jets"          afc . east )
-    ( :BAL            "Baltimore"       "Ravens"        afc . north )
-    ( :CIN            "Cincinnati"      "Bengals"       afc . north )
-    ( :CLE            "Cleveland"       "Browns"        afc . north )
-    ( :PIT            "Pittsburg"       "Steelers"      afc . north )
-    ( :HOU            "Houston"         "Texans"        afc . south )
-    ( :IND            "Indianapolis"    "Colts"         afc . south )
-    ( :JAX            "Jacksonville"    "Jaguars"       afc . south )
-    ( :TEN            "Tennessee"       "Titans"        afc . south )
-    ( :DEN            "Denver"          "Broncos"       afc . west )
-    ( :KC             "Kansas City"     "Chiefs"        afc . west )
-    ( :LV             "Las Vegas"       "Raiders"       afc . west )
-    ( :LAC            "Los Angeles"     "Chargers"      afc . west )
-    ( :DAL            "Dallas"          "Cowboys"       nfc . east )
-    ( :NYG            "New York"        "Giants"        nfc . east )
-    ( :PHI            "Philadelphia"    "Eagles"        nfc . east )
-    ( :WAS            "Washington"      "Commanders"    nfc . east )
-    ( :CHI            "Chicago"         "Bears"         nfc . north )
-    ( :DET            "Detroit"         "Lions"         nfc . north )
-    ( :GB             "Green Bay"       "Packers"       nfc . north )
-    ( :MIN            "Minisota"        "Vikings"       nfc . north )
-    ( :ATL            "Atlanta"         "Falcons"       nfc . south )
-    ( :CAR            "Carolina"        "Panthers"      nfc . south )
-    ( :NO             "New Orleans"     "Saints"        nfc . south )
-    ( :TB             "Tamba Bay"       "Buccaneers"    nfc . south )
-    ( :ARI            "Arizona"         "Cardinals"     nfc . west )
-    ( :LA             "Los Angeles"     "Rams"          nfc . west )
-    ( :SF             "San Fransisco"   "49ers"         nfc . west )
-    ( :SEA            "Seattle"         "Seahawks"      nfc . west )))
+    #( :BUF           "Buffalo"          "Bills"         afc   east )
+    #( :MIA           "Miami"            "Dolphins"      afc   east )
+    #( :NE            "New England"      "Patriots"      afc   east )
+    #( :NYJ           "New York"         "Jets"          afc   east )
+    #( :BAL            "Baltimore"       "Ravens"        afc   north )
+    #( :CIN            "Cincinnati"      "Bengals"       afc   north )
+    #( :CLE            "Cleveland"       "Browns"        afc   north )
+    #( :PIT            "Pittsburg"       "Steelers"      afc   north )
+    #( :HOU            "Houston"         "Texans"        afc   south )
+    #( :IND            "Indianapolis"    "Colts"         afc   south )
+    #( :JAX            "Jacksonville"    "Jaguars"       afc   south )
+    #( :TEN            "Tennessee"       "Titans"        afc   south )
+    #( :DEN            "Denver"          "Broncos"       afc   west )
+    #( :KC             "Kansas City"     "Chiefs"        afc   west )
+    #( :LV             "Las Vegas"       "Raiders"       afc   west )
+    #( :LAC            "Los Angeles"     "Chargers"      afc   west )
+    #( :DAL            "Dallas"          "Cowboys"       nfc   east )
+    #( :NYG            "New York"        "Giants"        nfc   east )
+    #( :PHI            "Philadelphia"    "Eagles"        nfc   east )
+    #( :WAS            "Washington"      "Commanders"    nfc   east )
+    #( :CHI            "Chicago"         "Bears"         nfc   north )
+    #( :DET            "Detroit"         "Lions"         nfc   north )
+    #( :GB             "Green Bay"       "Packers"       nfc   north )
+    #( :MIN            "Minisota"        "Vikings"       nfc   north )
+    #( :ATL            "Atlanta"         "Falcons"       nfc   south )
+    #( :CAR            "Carolina"        "Panthers"      nfc   south )
+    #( :NO             "New Orleans"     "Saints"        nfc   south )
+    #( :TB             "Tamba Bay"       "Buccaneers"    nfc   south )
+    #( :ARI            "Arizona"         "Cardinals"     nfc   west )
+    #( :LA             "Los Angeles"     "Rams"          nfc   west )
+    #( :SF             "San Fransisco"   "49ers"         nfc   west )
+    #( :SEA            "Seattle"         "Seahawks"      nfc   west )))
 
-(defun team-data-rec (team todo)
-  (if todo
-    (let ( (next (car todo)) )
-      (if (equalp team (car next))
-        (cdr next)
-        (team-data-rec team (cdr todo))))
-    nil))
+; (defun team-data-rec (team todo)
+;   (if todo
+;     (let ( (next (car todo)) )
+;       (if (equalp team (car next))
+;         (cdr next)
+;         (team-data-rec team (cdr todo))))
+;     nil))
 
-(defun team-data (team) (team-data-rec team league))
+; (defun team-data (team) (team-data-rec team league))
 
-(defun team-home (team)
-  (let ( (data (team-data team)) )
-    (if data (car data) nil)))
+; (defun team-home (team)
+;   (let ( (data (team-data team)) )
+;     (if data (car data) nil)))
 
-(defun team-name (team)
-  (let ( (data (team-data team)) )
-    (if data (car (cdr data)) nil)))
+; (defun team-name (team)
+;   (let ( (data (team-data team)) )
+;     (if data (car (cdr data)) nil)))
 
-(defun team-division (team)
-  (let ( (data (team-data team)) )
-    (if data (cdr (cdr data)) nil)))
+; (defun team-division (team)
+;   (let ( (data (team-data team)) )
+;     (if data (cdr (cdr data)) nil)))
 
-(defun team-title (team)
-  (let ( (data (team-data team)) )
-    (if data (concatenate 'string (car data) " " (car (cdr data))) nil)))
+; (defun team-title (team)
+;   (let ( (data (team-data team)) )
+;     (if data (concatenate 'string (car data) " " (car (cdr data))) nil)))
 
-(export 'team-home)
-(export 'team-name)
-(export 'team-division)
-(export 'team-title)
+; (export 'team-home)
+; (export 'team-name)
+; (export 'team-division)
+; (export 'team-title)
 
 (defvar schedule #(
   ;;            TEAMS        DATE           TIME    ON
@@ -386,3 +386,61 @@
     #( (:CIN . :PIT)  nil             nil       nil)
     #( (:NO  . :TB )  nil             nil       nil)
     #( (:HOU . :TEN)  nil             nil       nil) )))
+
+;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;; Now that the raw data is available let's put it in something nice, like it's own class
+;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+(defclass team ()
+  ( (id     :initarg  :id
+            :accessor team-id)
+    (home   :initarg  :home
+            :accessor team-home)
+    (name   :initarg  :name
+            :accessor team-name)
+    (conf   :initarg  :conf
+            :accessor team-conf)
+    (div    :initarg  :div 
+            :accessor team-div) )
+)
+
+(defvar team-map (make-hash-table))
+
+(defun make-team (id home name conf div)
+  (let ( (inst (make-instance 'team :id id :home home :name name :conf conf :div div)) )
+    (setf (gethash id team-map) inst)
+    inst))
+
+(mapcar (lambda (x) (make-team (aref x 0) (aref x 1) (aref x 2) (aref x 3) (aref x 4))) league)
+
+(defun find-team (id) (gethash id team-map))
+
+(export 'find-team)
+
+(defclass game ()
+  ( (home   :initarg    :home
+            :accessor   game-home-team)
+    (away   :initarg    :away
+            :accessor   game-away-team)
+    (match  :initarg    :match
+            :initform   nil
+            :accessor   game-match) )
+)
+
+(defclass match ()
+  ( (year   :initarg    :year
+            :initform   2024
+            :accessor   match-year)
+    (month  :initarg    :month
+            :accessor   match-month)
+    (day    :initarg    :day 
+            :accessor   match-day)
+    (hour   :initarg    :hour
+            :accessor   match-hour)
+    (minute :initarg    :minute
+            :accessor   match-minute)
+    (airs   :initargs   :airs
+            :accessor   match-airs) )
+)
+
+
