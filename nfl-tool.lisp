@@ -24,15 +24,23 @@
 ;; Define a function to create a pane class from a game
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+(defvar icon-size +icon-large+)
+
+(defclass team-icon-pane (clim-stream-pane) ())
+
 (defun display-eagles-icon (frame stream)
   (clim:updating-output (stream)
-    (let ( (image (make-pattern-from-bitmap-file (team-logo-file :phi +icon-large+))) )
+    (let ( (image (make-pattern-from-bitmap-file (team-logo-file :phi icon-size))) )
       (draw-image* stream image 0 0))))
 
 (define-application-frame team-info ()
   ( )
   (:panes (eagles-icon :application
-                       :background (make-rgb-color 0.0 (/ 72 256) (/ 81 256))
+;                      :background (make-rgb-color 0.0 (/ 72 256) (/ 81 256))
+                       :min-width icon-size
+                       :max-width icon-size
+                       :min-height icon-size
+                       :max-height icon-size
                        :display-function 'display-eagles-icon
                        :scroll-bars nil
           ))
