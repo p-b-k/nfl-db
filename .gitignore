@@ -1,4 +1,4 @@
-data/static/png/teams/*
-data/static/png/network/*
-data/static/png/nfl/*
+data/static/png/teams
+data/static/png/networks
+data/static/png/nfl
 .*
