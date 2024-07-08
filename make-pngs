@@ -1,0 +1,50 @@
+#!/bin/bash
+########################################################################################################################
+## Simple script to convert all of the svg files in this directory to png files in ../png
+########################################################################################################################
+
+cd $(dirname $0)
+
+mkdir -p ../png
+
+SVG_ROOT=./data/static/svg
+PNG_ROOT=./data/static/png
+
+TEAM_SVG_ROOT=$SVG_ROOT/teams
+NETWORK_SVG_ROOT=$SVG_ROOT/networks
+NFL_SVG_ROOT=$SVG_ROOT/nfl
+
+TEAM_PNG_ROOT=$PNG_ROOT/teams
+NETWORK_PNG_ROOT=$PNG_ROOT/networks
+NFL_PNG_ROOT=$PNG_ROOT/nfl
+
+
+for size in 32 64 128 256; do
+  # Teams
+  OUT_ROOT=$TEAM_PNG_ROOT/${size}x${size}
+  mkdir -p $OUT_ROOT
+  for x in $TEAM_SVG_ROOT/*.svg; do
+    OUT_FILE=$OUT_ROOT/$(echo $(basename $x) | sed 's/svg$/png/')
+    echo "Converting $x to $OUT_FILE"
+    rsvg-convert -o $OUT_FILE -w ${size} -h ${size} $x
+  done
+
+  # NFL Related
+  OUT_ROOT=$NFL_PNG_ROOT/${size}
+  mkdir -p $OUT_ROOT
+  for x in $NFL_SVG_ROOT/*.svg; do
+    OUT_FILE=$OUT_ROOT/$(echo $(basename $x) | sed 's/svg$/png/')
+    echo "Converting $x to $OUT_FILE"
+    rsvg-convert -o $OUT_FILE -h ${size} $x
+  done
+
+  # Broadcast Networks
+  OUT_ROOT=$NETWORK_PNG_ROOT/${size}
+  mkdir -p $OUT_ROOT
+  for x in $NETWORK_SVG_ROOT/*.svg; do
+    OUT_FILE=$OUT_ROOT/$(echo $(basename $x) | sed 's/svg$/png/')
+    echo "Converting $x to $OUT_FILE"
+    rsvg-convert -o $OUT_FILE -h ${size} $x
+  done
+
+done

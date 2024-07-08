@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; CLIM Color Editor example
+;; Database of NFL Season info
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; (ql:quickload "clim-examples")
@@ -16,7 +16,6 @@
 (export 'team-div-name) ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
 (export 'team-lookup)   ;; looks up a team from a team id and returns it, or nil
 
-
 (export 'game-week)     ;; Get the week from the week number, with a week being a sorted list of games
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -30,7 +29,7 @@
 
 (defclass game ()
   ( (week-no :initarg  :week
-             :accessor game-week)
+             :accessor game-week-no)
     (away-id :initarg  :away-team
              :accessor game-away-team)
     (home-id :initarg  :home-team
@@ -101,12 +100,13 @@
             :initform   nil
             :accessor   game-time)
     (airer  :initargs   :airer
+            :initform   nil
             :accessor   game-airer)
     (score  :initform   nil
             :accessor   game-score) )
 )
 
-(defun game-id (g) (list (game-week g) (game-home-team g) (game-away-team g)))
+(defun game-id (g) (list (game-week-no g) (game-home-team g) (game-away-team g)))
 
 (defclass game-date-data ()
   ( (year   :initarg    :year
@@ -163,6 +163,30 @@
       (if (and (not d1) (not d2))
         nil
         d1))))
+
+;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;; Methods to store and retrive accumulated data from the season
+;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+(defun read-value-from-file (file)
+  (let ( (f (open file :if-does-not-exist nil)) )
+    (if f
+      (let ( (value (read f)) )
+        (close f)
+        f)
+      nil)))
+
+(defmethod get-data-for-game ( (g game) field )
+  (format t "get-data-for-game: called on ~a, ~a~%" g field)
+  (format t "get-data-for-game: game away is ~a~%" (game-away-team g))
+  (format t "get-data-for-game: game home is ~a~%" (game-home-team g))
+  (format t "get-data-for-game: game week is ~a~%" (game-week-no g))
+  (with-slots ( week-no away-id home-id ) g
+    (let ( (game-day-file (format nil "data/cumulative/games/~2,'0d-~a-~a.game.~a.lisp"
+                week-no away-id home-id field)) )
+      (format t "get-data-for-game: game-day-file = ~a~%" game-day-file)
+      (let ( (file (probe-file game-day-file)) )
+        (if file (read-value-from-file file) nil)))))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; The game weeks

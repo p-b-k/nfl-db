@@ -58,3 +58,5 @@
 (defun load-data () (nfl-db::load-data nfl-static-data:schedule nfl-static-data:league nfl-static-data:colors))
 (export 'load-data)
 
+(load-data)
+(load "nfl-tool.lisp")

@@ -1,2 +1,4 @@
-data/static/logos/png/*.png
+data/static/png/teams/*
+data/static/png/network/*
+data/static/png/nfl/*
 .*
