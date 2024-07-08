@@ -22,13 +22,45 @@
 (defun team-logo-file (team size)
   (format nil "~a/teams/~ax~a/~a.png" +file-root/logos+ size size (symbol-name team)))
 
+(defvar icon-size +icon-xlarge+)
+
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Define a function to create a pane class from a game
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-(defvar icon-size +icon-xlarge+)
+(defclass team-icon-pane (clim-stream-pane)
+  ( (team :initarg :team)
+    (size :initarg :size) )
+)
 
-(defclass team-icon-pane (clim-stream-pane) ())
+(defun make-team-icon-pane (team size)
+  (let ( (color1 (car (team-colors team)))
+         (color2 (car (cdr (team-colors team)))) )
+     (let ( (rgb1 (make-rgb-color (/ (aref color1 0) 256)
+                                  (/ (aref color1 1) 256)
+                                  (/ (aref color1 2) 256)))
+            (rgb2 (make-rgb-color (/ (aref color2 0) 256)
+                                  (/ (aref color2 1) 256)
+                                  (/ (aref color2 2) 256))) )
+        (make-pane 'team-icon-pane :size size
+                                   :team team
+                                   :background rgb1
+                                   :max-width size
+                                   :min-width size
+                                   :max-height size
+                                   :min-height size))))
+
+(defmethod handle-repaint ((pane team-icon-pane) region)
+  (with-slots (team size) pane
+    (let ( (image (make-pattern-from-bitmap-file (team-logo-file team size)))
+           (bg    (car (team-colors team))) )
+      (clim:updating-output (pane)
+        (draw-image* pane image 0 0)))))
+
+(defun make-team-icon-pane-xsmall (team) (make-team-icon-pane team +icon-xsmall+))
+(defun make-team-icon-pane-small  (team) (make-team-icon-pane team +icon-small+))
+(defun make-team-icon-pane-large  (team) (make-team-icon-pane team +icon-large+))
+(defun make-team-icon-pane-xlarge (team) (make-team-icon-pane team +icon-xlarge+))
 
 (defun display-team-icon (frame stream)
   (with-slots (team) *application-frame*
@@ -44,27 +76,17 @@
 
 (define-application-frame team-info ()
   ( (team  :initarg :team :initform :phi) )
-  (:panes (team-icon :application
-;                      :background (make-rgb-color 0.0 (/ 72 256) (/ 81 256))
-;                      :background (make-rgb-color (/ (aref (team-colors team) 0) 256)
-;                                                  (/ (aref (team-colors team) 1) 256)
-;                                                  (/ (aref (team-colors team) 2) 256))
-                       :background (with-slots (team) *application-frame*
-                                     (let ( (color1 (car (team-colors team)))
-                                            (color2 (car (cdr (team-colors team)))) )
-                                        (make-rgb-color (/ (aref color1 0) 256)
-                                                        (/ (aref color1 1) 256)
-                                                        (/ (aref color1 2) 256))))
-                       :min-width icon-size
-                       :max-width icon-size
-                       :min-height icon-size
-                       :max-height icon-size
-;                      :display-function 'display-eagles-icon
-                       :display-function 'display-team-icon
-                       :scroll-bars nil
-          ))
+  (:panes (team-icon  (with-slots (team) *application-frame* (make-team-icon-pane-xlarge team))))
   (:layouts (default team-icon))
   (:menu-bar nil))
 
-(defun run (team) (run-frame-top-level (make-application-frame 'team-info :team team)))
+(define-application-frame game-info ()
+  ( (home  :initarg :home :initform :phi) (away  :initarg :away :initform :dal) )
+  (:panes (away-icon (with-slots (away) *application-frame* (make-team-icon-pane-large away)))
+          (home-icon (with-slots (home) *application-frame* (make-team-icon-pane-large home))))
+  (:layouts (default (horizontally () away-icon home-icon)))
+  (:menu-bar nil))
+
+(defun run-team (team) (run-frame-top-level (make-application-frame 'team-info :team team)))
+(defun run-game (away home) (run-frame-top-level (make-application-frame 'game-info :home home :away away)))
 
