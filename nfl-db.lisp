@@ -239,9 +239,11 @@
          (time  (aref record 2))
          (airer (aref record 3)) )
     (let ( (data (make-instance 'game-data :week week-no :away-team (car teams) :home-team (cdr teams))) )
-      (if date (setf (game-day data) (make-instance 'game-date-data :year (aref date 0) :month (aref date 1) :day (aref date 2))))
+      (if date (setf (game-day data) (make-instance 'game-date-data :year (aref date 0)
+                                                                    :month (aref date 1)
+                                                                    :day (aref date 2))))
       (if time (setf (game-time data) (make-instance 'game-time-data :hour (aref time 0) :minute (aref time 1))))
-      (if airer (if (symbolp airer) (setf (game-airer data) (if (symbolp airer) (list airer) airer))))
+      (if airer (setf (game-airer data) (if (symbolp airer) (list airer) airer)))
       data)))
 
 (defun rec-add-games-to-week (week-no games)

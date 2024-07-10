@@ -30,32 +30,44 @@
 
 (defclass team-icon-pane (clim-stream-pane)
   ( (team :initarg :team)
-    (size :initarg :size) )
+    (size :initarg :size)
+    (logo :initarg :logo)
+    (bg   :initarg :bg)
+    (hl   :initarg :nl) )
 )
 
+(defun get-team-color-main (team)
+  (let ( (color (car (team-colors team))) )
+     (make-rgb-color (/ (aref color 0) 255) (/ (aref color 1) 255) (/ (aref color 2) 255))))
+
+(defun get-team-color-highlight (team)
+  (let ( (color (car (cdr (team-colors team)))) )
+     (make-rgb-color (/ (aref color 0) 255) (/ (aref color 1) 255) (/ (aref color 2) 255))))
+
 (defun make-team-icon-pane (team size)
-  (let ( (color1 (car (team-colors team)))
-         (color2 (car (cdr (team-colors team)))) )
-     (let ( (rgb1 (make-rgb-color (/ (aref color1 0) 256)
-                                  (/ (aref color1 1) 256)
-                                  (/ (aref color1 2) 256)))
-            (rgb2 (make-rgb-color (/ (aref color2 0) 256)
-                                  (/ (aref color2 1) 256)
-                                  (/ (aref color2 2) 256))) )
-        (make-pane 'team-icon-pane :size size
-                                   :team team
-                                   :background rgb1
-                                   :max-width size
-                                   :min-width size
-                                   :max-height size
-                                   :min-height size))))
+  (make-pane 'team-icon-pane :size size
+                             :team team
+                             :background (get-team-color-main team)
+                             :max-width size
+                             :min-width size
+                             :max-height size
+                             :min-height size))
+
+(defconstant +border-off+ 4)
+(defconstant +border-width+ 4)
+(defconstant +border-thick+ 4)
+(defconstant +border-adjust+ (/ +border-thick+ 2))
 
 (defmethod handle-repaint ((pane team-icon-pane) region)
   (with-slots (team size) pane
-    (let ( (image (make-pattern-from-bitmap-file (team-logo-file team size)))
-           (bg    (car (team-colors team))) )
+    (let ( (image (make-pattern-from-bitmap-file (team-logo-file team size))) )
       (clim:updating-output (pane)
-        (draw-image* pane image 0 0)))))
+        (let ( (near-off (+ +border-adjust+ +border-off+))
+               (far-off (- size (- (* 2 +border-off+) +border-adjust+))) )
+          (draw-rectangle* pane +border-off+ +border-off+ far-off far-off
+                                :line-joint-shape :bevel
+                                :filled nil :line-thickness 4 :ink (get-team-color-highlight team))
+          (draw-image* pane image 0 0))))))
 
 (defun make-team-icon-pane-xsmall (team) (make-team-icon-pane team +icon-xsmall+))
 (defun make-team-icon-pane-small  (team) (make-team-icon-pane team +icon-small+))
