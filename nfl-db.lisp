@@ -15,6 +15,7 @@
 (export 'team-title)    ;; psuedo getter for the combined title of a team (e.g. "Philadelphia Eagles")
 (export 'team-div-name) ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
 (export 'team-lookup)   ;; looks up a team from a team id and returns it, or nil
+(export 'team-schedule) ;; the list of games in a teams schedule, in order, with NIL for a bye
 
 (export 'game-week)     ;; Get the week from the week number, with a week being a sorted list of games
 
@@ -257,6 +258,23 @@
     (let ( (week (aref sched week-no)) )
       (rec-add-games-to-week week-no week)
       (proc-sched (+ 1 week-no) sched))))
+
+(defun find-teams-game-in-week (todo team)
+  (if (null todo)
+    nil
+      (with-slots (away-id home-id) (car todo)
+        (if (or (eq team away-id) (eq team home-id))
+          (car todo)
+          (find-teams-game-in-week (cdr todo) team)))))
+
+(defun accum-sched (team week-no sched sofar)
+  (if (< week-no 18)
+    (accum-sched team (+ 1 week-no) sched (cons (find-teams-game-in-week (aref sched week-no) team) sofar))
+    (reverse sofar)))
+
+(defun team-schedule (team)
+  (accum-sched team 0 game-week-array nil))
+  
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Define a single point to load all the data
