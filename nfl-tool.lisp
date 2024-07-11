@@ -29,8 +29,6 @@
 (defun team-logo-file (team size)
   (format nil "~a/teams/~ax~a/~a.png" +file-root/logos+ size size (symbol-name team)))
 
-(defvar icon-size +icon-xlarge+)
-
 (defun get-team-color-main (team)
   (let ( (color (car (team-colors team))) )
      (make-rgb-color (/ (aref color 0) 255) (/ (aref color 1) 255) (/ (aref color 2) 255))))
@@ -91,9 +89,9 @@
   (let ( (main-color    (if invert (get-team-color-highlight team) (get-team-color-main team)))
          (second-color  (if invert (get-team-color-main team) (get-team-color-highlight team))) )
     (make-pane 'team-banner-pane :team team
-                                 :min-height +icon-xlarge+
-                                 :max-height +icon-xlarge+
-                                 :min-width  (* 4 +icon-xlarge+)
+                                 :min-height +icon-large+
+                                 :max-height +icon-large+
+                                 :min-width  (* 6 +icon-large+)
                                  :foreground second-color
                                  :background main-color)))
 
@@ -103,7 +101,7 @@
            (h (bounding-rectangle-height pane)) )
       (clim:updating-output (pane)
         (draw-text* pane (team-home team) 10 30 :text-size 20)
-        (draw-text* pane (team-name team) (floor w 2) (floor h 2) :text-size 120 :align-y :center :align-x :center)))))
+        (draw-text* pane (team-name team) (floor w 2) (floor h 2) :text-size 80 :align-y :center :align-x :center)))))
 
 ;; %% SCHEDULE (LIST) PANE ---------------------------------------------------------------------------------------------
 
@@ -131,7 +129,7 @@
 
 (define-application-frame team-info ()
   ( (team  :initarg :team :initform :phi) )
-  (:panes (team-icon    (with-slots (team) *application-frame* (make-team-icon-pane-xlarge team)))
+  (:panes (team-icon    (with-slots (team) *application-frame* (make-team-icon-pane-large team)))
           (team-banner  (with-slots (team) *application-frame* (make-team-banner-pane team t)))
           (team-sched   (with-slots (team) *application-frame* (make-team-schedule-pane team))))
   (:layouts (default (vertically () (horizontally () team-icon team-banner) team-sched)))
