@@ -21,9 +21,17 @@ NFL_PNG_ROOT=$PNG_ROOT/nfl
 
 for size in 32 64 128 256; do
   # Teams
-  OUT_ROOT=$TEAM_PNG_ROOT/${size}x${size}
+  OUT_ROOT=$TEAM_PNG_ROOT/logos/${size}x${size}
   mkdir -p $OUT_ROOT
-  for x in $TEAM_SVG_ROOT/*.svg; do
+  for x in $TEAM_SVG_ROOT/logos/*.svg; do
+    OUT_FILE=$OUT_ROOT/$(echo $(basename $x) | sed 's/svg$/png/')
+    echo "Converting $x to $OUT_FILE"
+    rsvg-convert -o $OUT_FILE -w ${size} -h ${size} $x
+  done
+
+  OUT_ROOT=$TEAM_PNG_ROOT/wordmarks/${size}x${size}
+  mkdir -p $OUT_ROOT
+  for x in $TEAM_SVG_ROOT/wordmarks/*.svg; do
     OUT_FILE=$OUT_ROOT/$(echo $(basename $x) | sed 's/svg$/png/')
     echo "Converting $x to $OUT_FILE"
     rsvg-convert -o $OUT_FILE -w ${size} -h ${size} $x

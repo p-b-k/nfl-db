@@ -27,7 +27,7 @@
 (defconstant afc_color (make-rgb-color (/ 206 256) (/ 19 256) (/ 102 256)))
 
 (defun team-logo-file (team size)
-  (format nil "~a/teams/~ax~a/~a.png" +file-root/logos+ size size (symbol-name team)))
+  (format nil "~a/teams/logos/~ax~a/~a.png" +file-root/logos+ size size (symbol-name team)))
 
 (defun get-team-color-main (team)
   (let ( (color (car (team-colors team))) )
@@ -109,7 +109,11 @@
    (make-pane :list-pane
               :mode :exclusive
               :items (team-schedule team)
-              :value-changed-callback (lambda (pane item) (format t "item changed: ~a~%" item))
+              :value-changed-callback
+                (lambda (pane item)
+                  (if item
+                    (format t "item changed: Game ~a @ ~a~%" (nfl-db::away-team item) (nfl-db::home-team item))
+                    (format t "item changed: BYE ~%")))
 ;             :value-changed-callback
 ;               (lambda (pane item)
 ;                 (declare (ignore pane))

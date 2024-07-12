@@ -30,11 +30,11 @@
 
 (defclass game ()
   ( (week-no :initarg  :week
-             :accessor game-week-no)
+             :accessor week-no)
     (away-id :initarg  :away-team
-             :accessor game-away-team)
+             :accessor away-team)
     (home-id :initarg  :home-team
-             :accessor game-home-team) )
+             :accessor home-team) )
 )
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -107,7 +107,7 @@
             :accessor   game-score) )
 )
 
-(defun game-id (g) (list (game-week-no g) (game-home-team g) (game-away-team g)))
+(defun game-id (g) (list (week-no g) (home-team g) (away-team g)))
 
 (defclass game-date-data ()
   ( (year   :initarg    :year
@@ -179,9 +179,9 @@
 
 (defmethod get-data-for-game ( (g game) field )
   (format t "get-data-for-game: called on ~a, ~a~%" g field)
-  (format t "get-data-for-game: game away is ~a~%" (game-away-team g))
-  (format t "get-data-for-game: game home is ~a~%" (game-home-team g))
-  (format t "get-data-for-game: game week is ~a~%" (game-week-no g))
+  (format t "get-data-for-game: game away is ~a~%" (away-team g))
+  (format t "get-data-for-game: game home is ~a~%" (home-team g))
+  (format t "get-data-for-game: game week is ~a~%" (week-no g))
   (with-slots ( week-no away-id home-id ) g
     (let ( (game-day-file (format nil "data/cumulative/games/~2,'0d-~a-~a.game.~a.lisp"
                 week-no away-id home-id field)) )
