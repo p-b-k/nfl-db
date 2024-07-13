@@ -174,31 +174,51 @@
           (let ( (home-icon-file (team-logo-file home +icon-small+))
                  (away-icon-file (team-logo-file away +icon-small+)) )
             (let ( (home-icon (make-pattern-from-bitmap-file home-icon-file))
-                   (away-icon (make-pattern-from-bitmap-file away-icon-file)) )
+                   (away-icon (make-pattern-from-bitmap-file away-icon-file))
+                   (home-bg (get-team-color-main home))
+                   (away-bg (get-team-color-main away)) )
               (clim:updating-output (pane)
+;               (draw-rectangle* pane 0 0 (+ +game-list-item-inner-border-size+ (* 2 +icon-small+)) h
+;                                :ink (make-rgb-color 1 1 1)) 
+                (draw-rectangle* pane +game-list-item-inner-border-size+
+                                      +game-list-item-bottom-border-size+
+                                      (+ +game-list-item-inner-border-size+ +icon-small+)
+                                      (+ +game-list-item-top-border-size+ +icon-small+)
+                                      :line-joint-shape :bevel
+                                      :filled t
+                                      :ink away-bg)
+                (draw-rectangle* pane (+ +icon-small+ (* 2 +game-list-item-inner-border-size+))
+                                      +game-list-item-bottom-border-size+
+                                      (* 2 (+ +icon-small+ +game-list-item-inner-border-size+))
+                                      (+ +game-list-item-top-border-size+ +icon-small+)
+                                      :line-joint-shape :bevel
+                                      :filled t
+                                      :ink home-bg)
                 (draw-line* pane 0 0 w 0 :ink +light-bg-color+)
                 (draw-line* pane 0 (- h 2) w h :ink +dark-bg-color+)
 ;               (draw-game-score-info pane w h game)
                 (draw-game-day-info pane w h game)
                 (draw-game-time-info pane w h game)
                 (draw-game-airer-info pane w h game)
-                (draw-image* pane away-icon 0 +game-list-item-top-border-size+)
-                (draw-image* pane home-icon (+ +icon-small+ +game-list-item-inner-border-size+)
+                (draw-image* pane away-icon +game-list-item-inner-border-size+ +game-list-item-top-border-size+)
+                (draw-image* pane home-icon (+ +icon-small+ (* 2 +game-list-item-inner-border-size+))
                                                +game-list-item-top-border-size+)))))
         (draw-text* pane "BYE" (floor w 2) (floor h 2) :text-size 20 :align-y :center :align-x :center)))))
 
 
 ;; %% SCHEDULE (LIST) PANE ---------------------------------------------------------------------------------------------
 
+; (defun make-team-schedule-pane (team)
+;   (make-pane :list-pane
+;              :mode :exclusive
+;              :items (team-schedule team)
+;              :value-changed-callback
+;                (lambda (pane item)
+;                  (if item
+;                    (format t "item changed: Game ~a @ ~a~%" (nfl-db::away-team item) (nfl-db::home-team item))
+;                    (format t "item changed: BYE ~%")))))
+
 (defun make-team-schedule-pane (team)
-; (make-pane :list-pane
-;            :mode :exclusive
-;            :items (team-schedule team)
-;            :value-changed-callback
-;              (lambda (pane item)
-;                (if item
-;                  (format t "item changed: Game ~a @ ~a~%" (nfl-db::away-team item) (nfl-db::home-team item))
-;                  (format t "item changed: BYE ~%"))))
   (let ( (games (team-schedule team)) )
     (make-pane :vbox-pane
                :contents (mapcar #'make-game-pane games))))
@@ -209,7 +229,8 @@
   ( (team  :initarg :team :initform :phi) )
   (:panes (team-icon    (with-slots (team) *application-frame* (make-team-icon-pane-large team)))
           (team-banner  (with-slots (team) *application-frame* (make-team-banner-pane team t)))
-          (team-sched   (with-slots (team) *application-frame* (make-team-schedule-pane team))))
+          (team-sched   (with-slots (team) *application-frame*
+                          (scrolling (:scroll-bar :vertical :height 300) (make-team-schedule-pane team)))))
   (:layouts (default (vertically () (horizontally () team-icon team-banner) team-sched)))
   (:menu-bar nil))
 
