@@ -3,6 +3,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ql:quickload "clim-examples")
+(ql:quickload "local-time")
 
 (defpackage #:nfl-tool (:use #:nfl-db #:clim #:clim-lisp #:clim-render))
 (in-package #:nfl-tool)
@@ -23,8 +24,11 @@
 (defconstant +border-thick+ 4)
 (defconstant +border-adjust+ (/ +border-thick+ 2))
 
-(defconstant +main-bg-color+ (make-rgb-color  (/ 155 255) (/ 155 255) (/ 155 255)))
-(defconstant +bye-bg-color+ (make-rgb-color  (/ 150 255) (/ 150 255) (/ 150 255)))
+; (defconstant +main-bg-color+ (make-rgb-color (/ 155 255) (/ 155 255) (/ 155 255)))
+; (defconstant +bye-bg-color+ (make-rgb-color  (/ 150 255) (/ 150 255) (/ 150 255)))
+(defconstant +main-bg-color+ (make-rgb-color 0.9 0.9 0.83))
+(defconstant +bye-bg-color+ (make-rgb-color  0.83 0.83 0.78))
+
 (defconstant +light-bg-color+ (make-rgb-color  (/ 175 255) (/ 175 255) (/ 175 255)))
 (defconstant +dark-bg-color+ (make-rgb-color  (/ 140 255) (/ 140 255) (/ 140 255)))
 
@@ -37,6 +41,10 @@
 
 (defconstant nfc_color (make-rgb-color 0.0 (/ 59 256) (/ 37 102)))
 (defconstant afc_color (make-rgb-color (/ 206 256) (/ 19 256) (/ 102 256)))
+
+(defconstant +days-of-week+ #("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday"))
+(defconstant +months+ #("January" "February" "March" "April" "May" "June"
+                        "July" "August" "September" "October" "November" "December"))
 
 (defun team-logo-file (team size)
   (format nil "~a/teams/logos/~ax~a/~a.png" +file-root/logos+ size size (symbol-name team)))
@@ -76,9 +84,9 @@
                                :bg main-color
                                :hl second-color
                                :background main-color
-                               :max-width size
-                               :min-width size
-                               :max-height size
+                               :max-width (+ (* 2 +game-list-item-inner-border-size+) size)
+                               :min-width (+ (* 2 +game-list-item-inner-border-size+) size)
+                               :max-height (+ +game-list-item-bottom-border-size+ +game-list-item-top-border-size+ size)
                                :min-height size)))
 
 (defmethod handle-repaint ((pane team-icon-pane) region)
@@ -86,11 +94,14 @@
     (let ( (image (make-pattern-from-bitmap-file (team-logo-file team size))) )
       (clim:updating-output (pane)
         (let ( (near-off (+ +border-adjust+ +border-off+))
-               (far-off (- size (- (* 2 +border-off+) +border-adjust+))) )
-          (draw-rectangle* pane +border-off+ +border-off+ far-off far-off
+               (far-off-x (- (+ size (* 2 +game-list-item-inner-border-size+))
+                             (- (* 2 +border-off+) +border-adjust+)))
+               (far-off-y (- (+ size)
+                             (- (* 2 +border-off+) +border-adjust+))) )
+          (draw-rectangle* pane +border-off+ +border-off+ far-off-x far-off-y
                                 :line-joint-shape :bevel
                                 :filled nil :line-thickness 4 :ink hl)
-          (draw-image* pane image 0 0))))))
+          (draw-image* pane image +game-list-item-inner-border-size+ +game-list-item-top-border-size+))))))
 
 ;; %% TEAM BANNER PANE -------------------------------------------------------------------------------------------------
 
@@ -139,9 +150,17 @@
 (defun draw-game-day-info (pane w h game)
   (let ( (day (game-day game)) )
     (if day
-      (let ( (text (format nil "~d/~d/~d"
-                           (nfl-db::game-date-month day) (nfl-db::game-date-day day) (nfl-db::game-date-year day))) )
-        (draw-text* pane text +game-day-info-x-offset+ (/ (* 3 h) 4))))))
+      (multiple-value-bind (secs mins hours day month year day-of-week dst tz)
+                           (decode-universal-time
+                              (encode-universal-time 0 0 0 (nfl-db::game-date-day day)
+                                                           (nfl-db::game-date-month day)
+                                                           (nfl-db::game-date-year day)))
+        (let ( (text (format nil "~a, ~a ~d ~d"
+                             (aref +days-of-week+ day-of-week)
+                             (aref +months+ (1- month))
+                             day
+                             year)) )
+          (draw-text* pane text +game-day-info-x-offset+ (/ (* 3 h) 4)))))))
 
 (defun draw-game-time-info (pane w h game)
   (let ( (tm (game-time game)) )
@@ -153,17 +172,18 @@
 
 (defun draw-game-airer-info (pane w h game)
   (let ( (airer (nfl-db::game-airer game)) )
-    (if (cdr airer)
-      (let ( (primary (car airer))
-             (secondary (car (cdr airer))) )
-        (draw-text* pane (symbol-name primary) (- +game-airer-info-x-offset+ 100) (floor h 2)
-                         :align-y :center
-                         :align-x :left)
-        (draw-text* pane (symbol-name secondary) +game-airer-info-x-offset+ (floor h 2)
-                         :align-y :center
-                         :align-x :left))
-      (draw-text* pane (symbol-name (car airer)) +game-airer-info-x-offset+ (floor h 2)
-                       :align-y :center :align-x :left))))
+    (if airer
+      (if (cdr airer)
+        (let ( (primary (car airer))
+               (secondary (car (cdr airer))) )
+          (draw-text* pane (symbol-name primary) (- +game-airer-info-x-offset+ 100) (floor h 2)
+                           :align-y :center
+                           :align-x :left)
+          (draw-text* pane (symbol-name secondary) +game-airer-info-x-offset+ (floor h 2)
+                           :align-y :center
+                           :align-x :left))
+        (draw-text* pane (symbol-name (car airer)) +game-airer-info-x-offset+ (floor h 2)
+                         :align-y :center :align-x :left)))))
 
 (defmethod handle-repaint ((pane game-pane) region)
   (with-slots (game) pane
@@ -195,7 +215,7 @@
                                       :filled t
                                       :ink home-bg)
                 (draw-line* pane 0 0 w 0 :ink +light-bg-color+)
-                (draw-line* pane 0 (- h 2) w h :ink +dark-bg-color+)
+                (draw-line* pane 0 (- h 1) w (- h 1) :ink +dark-bg-color+)
 ;               (draw-game-score-info pane w h game)
                 (draw-game-day-info pane w h game)
                 (draw-game-time-info pane w h game)
@@ -230,7 +250,7 @@
   (:panes (team-icon    (with-slots (team) *application-frame* (make-team-icon-pane-large team)))
           (team-banner  (with-slots (team) *application-frame* (make-team-banner-pane team t)))
           (team-sched   (with-slots (team) *application-frame*
-                          (scrolling (:scroll-bar :vertical :height 300) (make-team-schedule-pane team)))))
+                          (scrolling (:scroll-bar :vertical :height 400) (make-team-schedule-pane team)))))
   (:layouts (default (vertically () (horizontally () team-icon team-banner) team-sched)))
   (:menu-bar nil))
 
