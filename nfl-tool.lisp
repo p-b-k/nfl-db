@@ -35,9 +35,12 @@
 (defconstant +game-list-item-top-border-size+ 4)
 (defconstant +game-list-item-bottom-border-size+ 4)
 (defconstant +game-list-item-inner-border-size+ 4)
+(defconstant +game-list-item-date-padding+ 4)
 
-(defconstant +game-day-info-x-offset+ 300)
-(defconstant +game-airer-info-x-offset+ 800)
+(defconstant +game-day-info-x-offset+ (* 2 (+ +icon-small+
+                                              +game-list-item-inner-border-size+
+                                              +game-list-item-date-padding+)))
+(defconstant +game-airer-info-x-offset+ 200)
 
 (defconstant nfc_color (make-rgb-color 0.0 (/ 59 256) (/ 37 102)))
 (defconstant afc_color (make-rgb-color (/ 206 256) (/ 19 256) (/ 102 256)))
@@ -61,6 +64,17 @@
 (defun make-team-icon-pane-small  (team) (make-team-icon-pane team +icon-small+))
 (defun make-team-icon-pane-large  (team) (make-team-icon-pane team +icon-large+))
 (defun make-team-icon-pane-xlarge (team) (make-team-icon-pane team +icon-xlarge+))
+
+(defun resolve-airer-png-name (airer)
+  (cond
+    ( (eq airer :espn+) "ESPN_plus" )
+    ( (eq airer :netflix) "Netflix" )
+    ( (eq airer :peacock) "Peacock" )
+    ( (eq airer :prime) "Prime" )
+    ( t (symbol-name airer) )))
+
+(defun airer-logo-file (airer size)
+  (format nil "~a/networks/~a/~a.png" +file-root/logos+ size (resolve-airer-png-name airer)))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Create basic pane classes
@@ -176,14 +190,17 @@
       (if (cdr airer)
         (let ( (primary (car airer))
                (secondary (car (cdr airer))) )
-          (draw-text* pane (symbol-name primary) (- +game-airer-info-x-offset+ 100) (floor h 2)
+          (draw-text* pane (symbol-name primary) (- (- w +game-airer-info-x-offset+) 100) (floor h 2)
                            :align-y :center
                            :align-x :left)
-          (draw-text* pane (symbol-name secondary) +game-airer-info-x-offset+ (floor h 2)
+          (draw-text* pane (symbol-name secondary) (- w +game-airer-info-x-offset+) (floor h 2)
                            :align-y :center
-                           :align-x :left))
-        (draw-text* pane (symbol-name (car airer)) +game-airer-info-x-offset+ (floor h 2)
-                         :align-y :center :align-x :left)))))
+                           :align-x :left)
+        )
+        (let ( (airer-icon-file (airer-logo-file (car airer) +icon-xsmall+)) )
+          (let ( (airer-icon (make-pattern-from-bitmap-file airer-icon-file)) )
+            (draw-image* pane airer-icon (- w +game-airer-info-x-offset+) (+ +game-list-item-top-border-size+
+                                                                          (/ +icon-xsmall+ 2)))))))))
 
 (defmethod handle-repaint ((pane game-pane) region)
   (with-slots (game) pane
