@@ -23,6 +23,8 @@
 (defconstant +border-thick+ 4)
 (defconstant +border-adjust+ (/ +border-thick+ 2))
 
+(defconstant +main-bg-color+ (make-rgb-color  (/ 148 255) (/ 136 255) (/ 120 255)))
+
 (defconstant nfc_color (make-rgb-color 0.0 (/ 59 256) (/ 37 102)))
 (defconstant afc_color (make-rgb-color (/ 206 256) (/ 19 256) (/ 102 256)))
 
@@ -103,6 +105,36 @@
         (draw-text* pane (team-home team) 10 30 :text-size 20)
         (draw-text* pane (team-name team) (floor w 2) (floor h 2) :text-size 80 :align-y :center :align-x :center)))))
 
+;; %% GAME PANE --------------------------------------------------------------------------------------------------------
+
+(defclass game-pane (clim-stream-pane)
+  ( (game :initarg :game) )
+)
+
+(defun make-game-pane (game)
+  (make-pane 'game-pane :game game
+                        :background +main-bg-color+
+                        :min-height (if game +icon-small+ (/ +icon-small+ 2))
+                        :max-height (if game +icon-small+ (/ +icon-small+ 2))
+                        :min-width  (* 6 +icon-small+)
+  ))
+
+(defmethod handle-repaint ((pane game-pane) region)
+  (with-slots (game) pane
+    (let ( (w (bounding-rectangle-width  pane))
+           (h (bounding-rectangle-height pane)) )
+      (if game
+        (with-slots ( (week nfl-db::week-no) (away nfl-db::away-id) (home nfl-db::home-id) ) game
+          (let ( (home-icon-file (team-logo-file home +icon-small+))
+                 (away-icon-file (team-logo-file away +icon-small+)) )
+            (let ( (home-icon (make-pattern-from-bitmap-file home-icon-file))
+                   (away-icon (make-pattern-from-bitmap-file away-icon-file)) )
+              (clim:updating-output (pane)
+                (draw-image* pane away-icon 0 0)
+                (draw-image* pane home-icon +icon-small+ 0)))))
+        (draw-text* pane "BYE" (floor w 2) (floor h 2) :text-size 20 :align-y :center :align-x :center)))))
+
+
 ;; %% SCHEDULE (LIST) PANE ---------------------------------------------------------------------------------------------
 
 (defun make-team-schedule-pane (team)
@@ -114,19 +146,6 @@
                   (if item
                     (format t "item changed: Game ~a @ ~a~%" (nfl-db::away-team item) (nfl-db::home-team item))
                     (format t "item changed: BYE ~%")))
-;             :value-changed-callback
-;               (lambda (pane item)
-;                 (declare (ignore pane))
-;                 (let ((output (get-frame-pane *application-frame* 'output))
-;                    (description (get-frame-pane *application-frame* 'description)))
-;                (window-clear output)
-;                (window-clear description)
-;                (with-text-style (description (make-text-style :sans-serif :roman :normal))
-;                  (write-string (misc-test-description item) description)
-;                  (finish-output description))
-;                (with-application-frame (frame)
-;                  (setf (display-fn frame) (misc-test-drawer item))
-;                  (redisplay-frame-pane frame output :force-p t))))))
    ))
 
 ;; %% TOP LEVEL APPLICATION FRAMES -------------------------------------------------------------------------------------
@@ -140,12 +159,10 @@
   (:menu-bar nil))
 
 (define-application-frame game-info ()
-  ( (home  :initarg :home :initform :phi) (away  :initarg :away :initform :dal) )
-  (:panes (away-icon (with-slots (away) *application-frame* (make-team-icon-pane-large away)))
-          (home-icon (with-slots (home) *application-frame* (make-team-icon-pane-large home))))
-  (:layouts (default (horizontally () away-icon home-icon)))
+  ( (game :initarg :game) )
+  (:pane (with-slots (game) *application-frame* (make-game-pane game)))
   (:menu-bar nil))
 
 (defun run-team (team) (run-frame-top-level (make-application-frame 'team-info :team team)))
-(defun run-game (away home) (run-frame-top-level (make-application-frame 'game-info :home home :away away)))
+(defun run-game (game) (run-frame-top-level (make-application-frame 'game-info :game game)))
 

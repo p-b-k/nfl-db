@@ -15,9 +15,9 @@
 (export 'team-title)    ;; psuedo getter for the combined title of a team (e.g. "Philadelphia Eagles")
 (export 'team-div-name) ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
 (export 'team-lookup)   ;; looks up a team from a team id and returns it, or nil
-(export 'team-schedule) ;; the list of games in a teams schedule, in order, with NIL for a bye
 
-(export 'game-week)     ;; Get the week from the week number, with a week being a sorted list of games
+(export 'team-schedule) ;; the list of games in a teams schedule, in order, with NIL for a bye
+(export 'schedule-week) ;; Get the week from the week number, with a week being a sorted list of games
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Reference classes -- just enough data to look identifity the objects, but not the associated data
@@ -195,7 +195,7 @@
 
 (defvar game-week-array (make-array 18 :initial-element nil))
 
-(defun game-week (week-no) (aref game-week-array week-no))
+(defun schedule-week (week-no) (aref game-week-array week-no))
 (defun sort-week (week-no)
   (setf (aref game-week-array week-no)
         (sort (aref game-week-array week-no)
