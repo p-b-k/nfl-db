@@ -23,7 +23,17 @@
 (defconstant +border-thick+ 4)
 (defconstant +border-adjust+ (/ +border-thick+ 2))
 
-(defconstant +main-bg-color+ (make-rgb-color  (/ 148 255) (/ 136 255) (/ 120 255)))
+(defconstant +main-bg-color+ (make-rgb-color  (/ 155 255) (/ 155 255) (/ 155 255)))
+(defconstant +bye-bg-color+ (make-rgb-color  (/ 150 255) (/ 150 255) (/ 150 255)))
+(defconstant +light-bg-color+ (make-rgb-color  (/ 175 255) (/ 175 255) (/ 175 255)))
+(defconstant +dark-bg-color+ (make-rgb-color  (/ 140 255) (/ 140 255) (/ 140 255)))
+
+(defconstant +game-list-item-top-border-size+ 4)
+(defconstant +game-list-item-bottom-border-size+ 4)
+(defconstant +game-list-item-inner-border-size+ 4)
+
+(defconstant +game-day-info-x-offset+ 300)
+(defconstant +game-airer-info-x-offset+ 800)
 
 (defconstant nfc_color (make-rgb-color 0.0 (/ 59 256) (/ 37 102)))
 (defconstant afc_color (make-rgb-color (/ 206 256) (/ 19 256) (/ 102 256)))
@@ -112,12 +122,48 @@
 )
 
 (defun make-game-pane (game)
-  (make-pane 'game-pane :game game
-                        :background +main-bg-color+
-                        :min-height (if game +icon-small+ (/ +icon-small+ 2))
-                        :max-height (if game +icon-small+ (/ +icon-small+ 2))
-                        :min-width  (* 6 +icon-small+)
-  ))
+  (let ( (total-height (+ +icon-small+ +game-list-item-top-border-size+ +game-list-item-bottom-border-size+)) )
+    (make-pane 'game-pane :game game
+                          :background (if game +main-bg-color+ +bye-bg-color+)
+                          :min-height (if game total-height (/ +icon-small+ 2))
+                          :max-height (if game total-height (/ +icon-small+ 2))
+                          :min-width  (* 6 +icon-small+)
+    )))
+
+(defun draw-game-score-info (pane w h game)
+  (if (game-score game)
+    (let* ( (totals (score-totals (game-score game)))
+            (text (format nil "~2d ~2d" (car totals) (cdr totals))) )
+      (draw-text* pane text (floor w 2) (floor h 2) :align-y :center :x 200))))
+
+(defun draw-game-day-info (pane w h game)
+  (let ( (day (game-day game)) )
+    (if day
+      (let ( (text (format nil "~d/~d/~d"
+                           (nfl-db::game-date-month day) (nfl-db::game-date-day day) (nfl-db::game-date-year day))) )
+        (draw-text* pane text +game-day-info-x-offset+ (/ (* 3 h) 4))))))
+
+(defun draw-game-time-info (pane w h game)
+  (let ( (tm (game-time game)) )
+    (if tm
+      (let* ( (hr (nfl-db::game-time-hour tm))
+              (mn (nfl-db::game-time-minute tm))
+              (text (format nil "~d:~2,'0d ~a" (if (< hr 12) hr (- hr 12)) mn (if (< hr 12) 'AM 'PM))) )
+        (draw-text* pane text +game-day-info-x-offset+ (/ h 3))))))
+
+(defun draw-game-airer-info (pane w h game)
+  (let ( (airer (nfl-db::game-airer game)) )
+    (if (cdr airer)
+      (let ( (primary (car airer))
+             (secondary (car (cdr airer))) )
+        (draw-text* pane (symbol-name primary) (- +game-airer-info-x-offset+ 100) (floor h 2)
+                         :align-y :center
+                         :align-x :left)
+        (draw-text* pane (symbol-name secondary) +game-airer-info-x-offset+ (floor h 2)
+                         :align-y :center
+                         :align-x :left))
+      (draw-text* pane (symbol-name (car airer)) +game-airer-info-x-offset+ (floor h 2)
+                       :align-y :center :align-x :left))))
 
 (defmethod handle-repaint ((pane game-pane) region)
   (with-slots (game) pane
@@ -130,23 +176,32 @@
             (let ( (home-icon (make-pattern-from-bitmap-file home-icon-file))
                    (away-icon (make-pattern-from-bitmap-file away-icon-file)) )
               (clim:updating-output (pane)
-                (draw-image* pane away-icon 0 0)
-                (draw-image* pane home-icon +icon-small+ 0)))))
+                (draw-line* pane 0 0 w 0 :ink +light-bg-color+)
+                (draw-line* pane 0 (- h 2) w h :ink +dark-bg-color+)
+;               (draw-game-score-info pane w h game)
+                (draw-game-day-info pane w h game)
+                (draw-game-time-info pane w h game)
+                (draw-game-airer-info pane w h game)
+                (draw-image* pane away-icon 0 +game-list-item-top-border-size+)
+                (draw-image* pane home-icon (+ +icon-small+ +game-list-item-inner-border-size+)
+                                               +game-list-item-top-border-size+)))))
         (draw-text* pane "BYE" (floor w 2) (floor h 2) :text-size 20 :align-y :center :align-x :center)))))
 
 
 ;; %% SCHEDULE (LIST) PANE ---------------------------------------------------------------------------------------------
 
 (defun make-team-schedule-pane (team)
-   (make-pane :list-pane
-              :mode :exclusive
-              :items (team-schedule team)
-              :value-changed-callback
-                (lambda (pane item)
-                  (if item
-                    (format t "item changed: Game ~a @ ~a~%" (nfl-db::away-team item) (nfl-db::home-team item))
-                    (format t "item changed: BYE ~%")))
-   ))
+; (make-pane :list-pane
+;            :mode :exclusive
+;            :items (team-schedule team)
+;            :value-changed-callback
+;              (lambda (pane item)
+;                (if item
+;                  (format t "item changed: Game ~a @ ~a~%" (nfl-db::away-team item) (nfl-db::home-team item))
+;                  (format t "item changed: BYE ~%"))))
+  (let ( (games (team-schedule team)) )
+    (make-pane :vbox-pane
+               :contents (mapcar #'make-game-pane games))))
 
 ;; %% TOP LEVEL APPLICATION FRAMES -------------------------------------------------------------------------------------
 

@@ -16,6 +16,13 @@
 (export 'team-div-name) ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
 (export 'team-lookup)   ;; looks up a team from a team id and returns it, or nil
 
+(export 'game-day)      ;; accessor or the date of the game
+(export 'game-time)     ;; accessor or the time of the game
+(export 'game-score)    ;; accessor or the score of the game
+(export 'game-airer)    ;; accessor or the airer of the game
+
+(export 'score-totals)  ;; the total scores (away . home) for a game
+
 (export 'team-schedule) ;; the list of games in a teams schedule, in order, with NIL for a bye
 (export 'schedule-week) ;; Get the week from the week number, with a week being a sorted list of games
 
@@ -143,10 +150,14 @@
     (< (game-time-hour d1) (game-time-hour d2))))
 
 (defclass game-score ()
-  ( (home   :initform   #(0 0 0 0 0)
+  ( (home   :initform   '()
             :accessor   score-home)
-    (away   :initform   #(0 0 0 0 0)
+    (away   :initform   '()
             :accessor   score-away) ))
+
+(defmethod score-totals ((s game-score))
+  (with-slots (home away) s
+    (cons (apply #'+ away) (apply #'+ home))))
 
 (defmethod game-earlier ( (g1 game-data) (g2 game-data) )
   (let ( (d1 (game-day g1))
