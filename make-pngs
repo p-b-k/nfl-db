@@ -5,8 +5,6 @@
 
 cd $(dirname $0)
 
-mkdir -p ../png
-
 SVG_ROOT=./data/static/svg
 PNG_ROOT=./data/static/png
 
