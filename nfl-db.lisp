@@ -7,26 +7,27 @@
 (defpackage #:nfl-db (:use #:cl))
 (in-package #:nfl-db)
 
-(export 'team-home)       ;; getter for where a team plays (e.g. "Philadelphia")
-(export 'team-name)       ;; getter for the name of a team (e.g. "Eagles")
-(export 'team-colors)     ;; getter for the color scheme of a team (e.g. "(dark-green white grey black)")
-(export 'team-conf)       ;; getter for the conference of a team (e.g. :NFC)
-(export 'team-div)        ;; getter for the division of a team (e.g. :EAST)
-(export 'team-title)      ;; psuedo getter for the combined title of a team (e.g. "Philadelphia Eagles")
-(export 'team-div-name)   ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
-(export 'team-lookup)     ;; looks up a team from a team id and returns it, or nil
+(export 'team-home)          ;; getter for where a team plays (e.g. "Philadelphia")
+(export 'team-name)          ;; getter for the name of a team (e.g. "Eagles")
+(export 'team-colors)        ;; getter for the color scheme of a team (e.g. "(dark-green white grey black)")
+(export 'team-conf)          ;; getter for the conference of a team (e.g. :NFC)
+(export 'team-div)           ;; getter for the division of a team (e.g. :EAST)
+(export 'team-title)         ;; psuedo getter for the combined title of a team (e.g. "Philadelphia Eagles")
+(export 'team-div-name)      ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
+(export 'team-lookup)        ;; looks up a team from a team id and returns it, or nil
 
-(export 'game-day)        ;; accessor or the date of the game
-(export 'game-time)       ;; accessor or the time of the game
-(export 'game-score)      ;; accessor or the score of the game
-(export 'game-airer)      ;; accessor or the airer of the game
+(export 'game-day)           ;; accessor or the date of the game
+(export 'game-time)          ;; accessor or the time of the game
+(export 'game-score)         ;; accessor or the score of the game
+(export 'game-airer)         ;; accessor or the airer of the game
 
-(export 'score-totals)    ;; the total scores (away . home) for a game
+(export 'score-totals)       ;; the total scores (away . home) for a game
 
-(export 'division-teams)  ;; The teams in a given division
+(export 'division-teams)     ;; The teams in a given division
+(export 'conference-teams)   ;; The teams in a givin conference
 
-(export 'team-schedule)   ;; the list of games in a teams schedule, in order, with NIL for a bye
-(export 'schedule-week)   ;; Get the week from the week number, with a week being a sorted list of games
+(export 'team-schedule)      ;; the list of games in a teams schedule, in order, with NIL for a bye
+(export 'schedule-week)      ;; Get the week from the week number, with a week being a sorted list of games
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Reference classes -- just enough data to look identifity the objects, but not the associated data
@@ -301,6 +302,11 @@
   (let ( (l nil) )
     (maphash (lambda (a b) (setf l (cons b l))) team-map)
     (filter-teams l '() :conf conf :div div)))
+
+(defun conference-teams (conf)
+  (let ( (l nil) )
+    (maphash (lambda (a b) (setf l (cons b l))) team-map)
+    (filter-teams l '() :conf conf)))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Define a single point to load all the data
