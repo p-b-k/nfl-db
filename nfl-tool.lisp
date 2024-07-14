@@ -270,6 +270,11 @@
 
 ;; %% LEAGUE (ALL THE TEAMS) PANE --------------------------------------------------------------------------------------
 
+(defclass conference-pane (clim-stream-pane)
+  ( (conference :initarg :conference) )
+)
+
+
 ;; %% TOP LEVEL APPLICATION FRAMES -------------------------------------------------------------------------------------
 
 (define-application-frame team-info ()

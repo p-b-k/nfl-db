@@ -7,24 +7,26 @@
 (defpackage #:nfl-db (:use #:cl))
 (in-package #:nfl-db)
 
-(export 'team-home)     ;; getter for where a team plays (e.g. "Philadelphia")
-(export 'team-name)     ;; getter for the name of a team (e.g. "Eagles")
-(export 'team-colors)   ;; getter for the color scheme of a team (e.g. "(dark-green white grey black)")
-(export 'team-conf)     ;; getter for the conference of a team (e.g. :NFC)
-(export 'team-div)      ;; getter for the division of a team (e.g. :EAST)
-(export 'team-title)    ;; psuedo getter for the combined title of a team (e.g. "Philadelphia Eagles")
-(export 'team-div-name) ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
-(export 'team-lookup)   ;; looks up a team from a team id and returns it, or nil
+(export 'team-home)       ;; getter for where a team plays (e.g. "Philadelphia")
+(export 'team-name)       ;; getter for the name of a team (e.g. "Eagles")
+(export 'team-colors)     ;; getter for the color scheme of a team (e.g. "(dark-green white grey black)")
+(export 'team-conf)       ;; getter for the conference of a team (e.g. :NFC)
+(export 'team-div)        ;; getter for the division of a team (e.g. :EAST)
+(export 'team-title)      ;; psuedo getter for the combined title of a team (e.g. "Philadelphia Eagles")
+(export 'team-div-name)   ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
+(export 'team-lookup)     ;; looks up a team from a team id and returns it, or nil
 
-(export 'game-day)      ;; accessor or the date of the game
-(export 'game-time)     ;; accessor or the time of the game
-(export 'game-score)    ;; accessor or the score of the game
-(export 'game-airer)    ;; accessor or the airer of the game
+(export 'game-day)        ;; accessor or the date of the game
+(export 'game-time)       ;; accessor or the time of the game
+(export 'game-score)      ;; accessor or the score of the game
+(export 'game-airer)      ;; accessor or the airer of the game
 
-(export 'score-totals)  ;; the total scores (away . home) for a game
+(export 'score-totals)    ;; the total scores (away . home) for a game
 
-(export 'team-schedule) ;; the list of games in a teams schedule, in order, with NIL for a bye
-(export 'schedule-week) ;; Get the week from the week number, with a week being a sorted list of games
+(export 'division-teams)  ;; The teams in a given division
+
+(export 'team-schedule)   ;; the list of games in a teams schedule, in order, with NIL for a bye
+(export 'schedule-week)   ;; Get the week from the week number, with a week being a sorted list of games
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Reference classes -- just enough data to look identifity the objects, but not the associated data
@@ -57,7 +59,7 @@
               :accessor team-colors)
     (conf     :initarg  :conf
               :accessor team-conf)
-    (div      :initarg  :div 
+    (div      :initarg  :div
               :accessor team-div) )
 )
 
@@ -121,7 +123,7 @@
             :accessor   game-date-year)
     (month  :initarg    :month
             :accessor   game-date-month)
-    (day    :initarg    :day 
+    (day    :initarg    :day
             :accessor   game-date-day) )
 )
 
@@ -285,7 +287,20 @@
 
 (defun team-schedule (team)
   (accum-sched team 0 game-week-array nil))
-  
+
+(defun filter-teams (todo sofar &key conf div)
+  (if todo
+    (with-slots ((c conf) (d div)) (car todo)
+      (if (and (or (not conf) (eq c conf))
+               (or (not div) (eq d div)))
+        (filter-teams (cdr todo) (cons (car todo) sofar) :conf conf :div div)
+        (filter-teams (cdr todo) sofar :conf conf :div div)))
+    sofar))
+
+(defun division-teams (conf div)
+  (let ( (l nil) )
+    (maphash (lambda (a b) (setf l (cons b l))) team-map)
+    (filter-teams l '() :conf conf :div div)))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Define a single point to load all the data
@@ -294,7 +309,7 @@
 (defun load-data (schedule teams colors)
   ;; Start with the static data
 
-  ;; The teams firstdefun 
+  ;; The teams firstdefun
   (mapcar (lambda (x) (load-teams-with-colors x colors)) teams)
 
   ;; The the base schedule as is it known to us before the start of the season
