@@ -139,7 +139,11 @@
            (h (bounding-rectangle-height pane)) )
       (clim:updating-output (pane)
         (draw-text* pane (team-home team) 10 30 :text-size 20)
-        (draw-text* pane (team-name team) (floor w 2) (floor h 2) :text-size 80 :align-y :center :align-x :center)))))
+        (draw-text* pane (team-name team) (floor w 2) (floor h 2)
+                         :text-size 80
+                         :text-face :italic
+                         :align-y :center
+                         :align-x :center)))))
 
 ;; %% GAME PANE --------------------------------------------------------------------------------------------------------
 
