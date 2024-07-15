@@ -20,17 +20,20 @@
 (load-data)
 (load "nfl-tool.lisp")
 
+(ql:quickload "clim-listener")
+
+(defun start-listener () (clim-listener:run-listener))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Try out presentation types
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-(define-presentation-method accept ((type nfl-db::team) stream view &key)
-  (let ( (team-id (accept '(member buf mia ne nyj bal cin cle pit hou ind jax ten den kc lv lac
-                                   dal nyg phi was chi det gb min atl car no tb ari la sf sea)
-                          :stream stream
-                          :prompt "?")) )
-    (make-team team-id)))
+; (define-presentation-method accept ((type nfl-db::team) stream view &key)
+;   (let ( (team-id (accept '(member buf mia ne nyj bal cin cle pit hou ind jax ten den kc lv lac
+;                                    dal nyg phi was chi det gb min atl car no tb ari la sf sea)
+;                           :stream stream
+;                           :prompt "?")) )
+;     (make-team team-id)))
 
 ; (in-package :clim-user)
 

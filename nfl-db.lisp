@@ -7,6 +7,7 @@
 (defpackage #:nfl-db (:use #:cl))
 (in-package #:nfl-db)
 
+(export 'team-id)            ;; getter for the team id
 (export 'team-home)          ;; getter for where a team plays (e.g. "Philadelphia")
 (export 'team-name)          ;; getter for the name of a team (e.g. "Eagles")
 (export 'team-colors)        ;; getter for the color scheme of a team (e.g. "(dark-green white grey black)")

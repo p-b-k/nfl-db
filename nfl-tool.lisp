@@ -74,6 +74,17 @@
   (format nil "~a/networks/~a/~a.png" +file-root/logos+ size (resolve-airer-png-name airer)))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;; Create Presentation Methods
+;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+(define-presentation-method present (object (type nfl-db::team) stream view &key)
+  (format stream "~a" (team-title object)))
+
+(define-presentation-method present (object (type nfl-db::game) stream view &key)
+  (with-slots ( (w nfl-db::week-no) (a nfl-db::away-id) (h nfl-db::home-id) ) object
+    (format stream "[~d] ~a @ ~a" w a h)))
+
+;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Create basic pane classes
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -274,10 +285,27 @@
 
 ;; %% LEAGUE (ALL THE TEAMS) PANE --------------------------------------------------------------------------------------
 
-(defclass conference-pane (clim-stream-pane)
-  ( (conference :initarg :conference) )
-)
+(defconstant +team-icon-border+ 30)
 
+(defun make-division-pane (teams)
+  (make-pane :hbox
+             :min-width (+ +icon-small+ (* 2 +team-icon-border+))
+             :max-width (+ +icon-small+ (* 2 +team-icon-border+))
+             :min-height (+ +icon-small+ (* 2 +team-icon-border+))
+             :max-height (+ +icon-small+ (* 2 +team-icon-border+))
+             :contents (mapcar
+                          (lambda (x) (make-team-icon-pane (team-id x) +icon-small+ nil
+                                                           :north +team-icon-border+ :east +team-icon-border+
+                                                           :west +team-icon-border+ :south +team-icon-border+))
+                          teams)))
+
+(defun make-conference-pane (conf)
+  (let ( (n (division-teams conf :north))
+         (e (division-teams conf :east))
+         (s (division-teams conf :south))
+         (w (division-teams conf :west)) )
+    (make-pane :vbox-pane
+               :contents (mapcar #'make-division-pane (list n e s w)))))
 
 ;; %% TOP LEVEL APPLICATION FRAMES -------------------------------------------------------------------------------------
 
@@ -307,4 +335,5 @@
 
 (defun run-team (team) (run-frame-top-level (make-application-frame 'team-info :team team)))
 (defun run-game (game) (run-frame-top-level (make-application-frame 'game-info :game game)))
+(defun run-league () (run-frame-top-level (make-application-frame 'league-info)))
 
