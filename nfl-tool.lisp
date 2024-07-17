@@ -88,6 +88,55 @@
 ;; Create basic pane classes
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+;; %% TEAM BUTTON ------------------------------------------------------------------------------------------------------
+
+(defclass team-button (push-button-pane)
+  ( (team  :initarg :team)
+    (size  :initarg :size)
+    (north :initarg :north :initform 0)
+    (east  :initarg :east  :initform 0)
+    (south :initarg :south :initform 0)
+    (west  :initarg :west  :initform 0) ))
+
+(defmethod handle-repaint ((button team-button) region)
+  (with-slots (team size north east south west) button
+    (let ( (main-color    (get-team-color-main team))
+           (second-color  (get-team-color-highlight team))
+           (image (make-pattern-from-bitmap-file (team-logo-file team size))) )
+      (let ( (far-off-x (- (+ size east west) 7))
+             (far-off-y (- (+ size north south) 7)) )
+        (draw-rectangle* button 6 6 far-off-x far-off-y
+                              :line-joint-shape :bevel
+                              :filled nil :line-thickness 4 :ink main-color)
+        (draw-image* button image east north)))))
+
+(defun make-team-button (team size &optional invert &key (north 0) (east 0) (south 0) (west 0))
+; (make-pane 'push-button :label (team-name team))
+  (make-pane 'team-button :label (team-name team) :team team :size size
+                                                  :background (make-rgb-color 1 1 1)
+                                                  :north north :south south :east east :west west
+                                                  :min-width (+ east west size) :max-width (+ east west size)
+                                                  :min-height (+ north south size) :max-height (+ north south size))
+)
+
+; (defun make-team-button (team size &optional invert &key (north 0) (east 0) (south 0) (west 0))
+;   (let ( (main-color    (if invert (get-team-color-highlight team) (get-team-color-main team)))
+;          (second-color  (if invert (get-team-color-main team) (get-team-color-highlight team))) )
+;     (make-pane 'team-button :size size
+;                             :team team
+;                             :north north
+;                             :south south
+;                             :east east
+;                             :west west
+;                             :bg main-color
+;                             :hl second-color
+;                             :background main-color
+;                             :max-width (+ east west size)
+;                             :min-width (+ east west size)
+;                             :max-height (+ north south size)
+;                             :min-height size)))
+
+
 ;; %% TEAM ICON PANE ---------------------------------------------------------------------------------------------------
 
 (defclass team-icon-pane (clim-stream-pane)
@@ -294,10 +343,16 @@
              :min-height (+ +icon-small+ (* 2 +team-icon-border+))
              :max-height (+ +icon-small+ (* 2 +team-icon-border+))
              :contents (mapcar
-                          (lambda (x) (make-team-icon-pane (team-id x) +icon-small+ nil
-                                                           :north +team-icon-border+ :east +team-icon-border+
-                                                           :west +team-icon-border+ :south +team-icon-border+))
-                          teams)))
+                          (lambda (x) (make-team-button (team-id x) +icon-small+ nil
+                                                        :north +team-icon-border+ :east +team-icon-border+
+                                                        :west +team-icon-border+ :south +team-icon-border+))
+                          teams)
+;            :contents (mapcar
+;                         (lambda (x) (make-team-icon-pane (team-id x) +icon-small+ nil
+;                                                          :north +team-icon-border+ :east +team-icon-border+
+;                                                          :west +team-icon-border+ :south +team-icon-border+))
+;                         teams)
+  ))
 
 (defun make-conference-pane (conf)
   (let ( (n (division-teams conf :north))
@@ -329,11 +384,26 @@
 (define-application-frame league-info ()
   ( )
   (:panes (nfc (make-conference-pane :nfc))
-          (afc (make-conference-pane :afc)))
-  (:layouts (default (horizontally () afc nfc)))
-  (:menu-bar nil))
+          (afc (make-conference-pane :afc))
+          (interactor :interactor))
+  (:layouts (default (vertically () (horizontally () afc nfc))))
+  (:menu-bar t))
 
 (defun run-team (team) (run-frame-top-level (make-application-frame 'team-info :team team)))
 (defun run-game (game) (run-frame-top-level (make-application-frame 'game-info :game game)))
 (defun run-league () (run-frame-top-level (make-application-frame 'league-info)))
+
+; ;; Could we do this better? like with  `(member ,(mapcar #'car nfl-static-data:colors))
+; (define-presentation-method accept ((type nfl-db::team) stream view &key)
+;   (declare (ingore view))
+;   (let ( (team (accept `(member (:BUF :MIA :NE :NYJ :BAL :CIN :CLE :PIT :HOU :IND :JAX :TEN :DEN :KC :LV :LAC
+;                                  :DAL :NYG :PHI :WAS :CHI :DET :GB :MIN :ATL :CAR :NO :TB :ARI :LA :SF :SEA)))) )
+;     (format t "accept ~a: team = ~a~%" 'nfl-db::team team)
+;     (make-instance 'nfl-db::team team)))
+
+(define-league-info-command (com-show-team-schedule :menu t :name "Show Sched")
+  ( (team 'nfl-db::team) )
+  (format t "com-show-team-schedule: team = ~a~%" team)
+  (run-frame-top-level (make-application-frame 'team-info :team team))
+)
 

@@ -4,6 +4,7 @@
 
 ; (require "adsf")
 (ql:quickload "clim-examples")
+(ql:quickload "clim-listener")
 
 (defpackage :app (:use :clim :clim-lisp) (:export run-app))
 
@@ -20,7 +21,6 @@
 (load-data)
 (load "nfl-tool.lisp")
 
-(ql:quickload "clim-listener")
 
 (defun start-listener () (clim-listener:run-listener))
 
