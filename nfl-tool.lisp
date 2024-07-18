@@ -267,14 +267,20 @@
                    (home-bg (get-team-color-main home))
                    (away-bg (get-team-color-main away)) )
               (clim:updating-output (pane)
-;               (draw-rectangle* pane 0 0 (+ +game-list-item-inner-border-size+ (* 2 +icon-small+)) h
-;                                :ink (make-rgb-color 1 1 1)) 
                 (draw-rectangle* pane +game-list-item-west-border-size+
                                       +game-list-item-bottom-border-size+
                                       (+ +game-list-item-west-border-size+ +icon-small+)
                                       (+ +game-list-item-top-border-size+ +icon-small+)
-;                                     :line-joint-shape :bevel
+                                      :line-joint-shape :bevel
                                       :filled t
+                                      :ink (make-rgb-color 1 1 1))
+                (draw-rectangle* pane +game-list-item-west-border-size+
+                                      +game-list-item-bottom-border-size+
+                                      (+ +game-list-item-west-border-size+ +icon-small+)
+                                      (+ +game-list-item-top-border-size+ +icon-small+)
+                                      :line-thickness 2
+                                      :line-joint-shape :bevel
+                                      :filled nil
                                       :ink away-bg)
                 (draw-rectangle* pane (+ +icon-small+
                                          +game-list-item-west-border-size+
@@ -284,12 +290,24 @@
                                               +game-list-item-west-border-size+
                                               +game-list-item-inner-border-size+)
                                       (+ +game-list-item-top-border-size+ +icon-small+)
-;                                     :line-joint-shape :bevel
+                                      :line-joint-shape :bevel
                                       :filled t
+                                      :ink (make-rgb-color 1 1 1))
+                (draw-rectangle* pane (+ +icon-small+
+                                         +game-list-item-west-border-size+
+                                         +game-list-item-inner-border-size+)
+                                      +game-list-item-bottom-border-size+
+                                      (+ (* 2 +icon-small+)
+                                              +game-list-item-west-border-size+
+                                              +game-list-item-inner-border-size+)
+                                      (+ +game-list-item-top-border-size+ +icon-small+)
+                                      :line-thickness 2
+                                      :line-joint-shape :bevel
+                                      :filled nil
                                       :ink home-bg)
                 (draw-line* pane 0 0 w 0 :ink +light-bg-color+)
                 (draw-line* pane 0 (- h 1) w (- h 1) :ink +dark-bg-color+)
-;               (draw-game-score-info pane w h game)
+                (draw-game-score-info pane w h game)
                 (draw-game-day-info pane w h game)
                 (draw-game-time-info pane w h game)
                 (draw-game-airer-info pane w h game)
