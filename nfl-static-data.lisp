@@ -41,7 +41,7 @@
     #( :CHI           "Chicago"          "Bears"        :nfc  :north )
     #( :DET           "Detroit"          "Lions"        :nfc  :north )
     #( :GB            "Green Bay"        "Packers"      :nfc  :north )
-    #( :MIN           "Minisota"         "Vikings"      :nfc  :north )
+    #( :MIN           "Minnisota"        "Vikings"      :nfc  :north )
     #( :ATL           "Atlanta"          "Falcons"      :nfc  :south )
     #( :CAR           "Carolina"         "Panthers"     :nfc  :south )
     #( :NO            "New Orleans"      "Saints"       :nfc  :south )

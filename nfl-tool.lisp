@@ -24,8 +24,6 @@
 (defconstant +border-thick+ 4)
 (defconstant +border-adjust+ (/ +border-thick+ 2))
 
-; (defconstant +main-bg-color+ (make-rgb-color (/ 155 255) (/ 155 255) (/ 155 255)))
-; (defconstant +bye-bg-color+ (make-rgb-color  (/ 150 255) (/ 150 255) (/ 150 255)))
 (defconstant +main-bg-color+ (make-rgb-color 0.9 0.9 0.83))
 (defconstant +bye-bg-color+ (make-rgb-color  0.83 0.83 0.78))
 
@@ -110,13 +108,19 @@
                               :filled nil :line-thickness 4 :ink main-color)
         (draw-image* button image east north)))))
 
+(defun on-team-icon-click (team-button)
+  (with-slots (team) team-button
+;   (format t "Team button clicked: ~a~%" (team-title team))
+    (run-frame-top-level (make-application-frame 'team-info :team team))))
+
 (defun make-team-button (team size &optional invert &key (north 0) (east 0) (south 0) (west 0))
 ; (make-pane 'push-button :label (team-name team))
   (make-pane 'team-button :label (team-name team) :team team :size size
                                                   :background (make-rgb-color 1 1 1)
                                                   :north north :south south :east east :west west
                                                   :min-width (+ east west size) :max-width (+ east west size)
-                                                  :min-height (+ north south size) :max-height (+ north south size))
+                                                  :min-height (+ north south size) :max-height (+ north south size)
+                                                  :activate-callback #'on-team-icon-click)
 )
 
 ; (defun make-team-button (team size &optional invert &key (north 0) (east 0) (south 0) (west 0))
@@ -159,9 +163,10 @@
                                :south south
                                :east east
                                :west west
-                               :bg main-color
-                               :hl second-color
-                               :background main-color
+                               :bg second-color
+                               :hl main-color
+;                              :background main-color
+                               :background (make-rgb-color 1 1 1)
                                :max-width (+ east west size)
                                :min-width (+ east west size)
                                :max-height (+ north south size)
