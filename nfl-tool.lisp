@@ -110,11 +110,9 @@
 
 (defun on-team-icon-click (team-button)
   (with-slots (team) team-button
-;   (format t "Team button clicked: ~a~%" (team-title team))
     (run-frame-top-level (make-application-frame 'team-info :team team))))
 
 (defun make-team-button (team size &optional invert &key (north 0) (east 0) (south 0) (west 0))
-; (make-pane 'push-button :label (team-name team))
   (make-pane 'team-button :label (team-name team) :team team :size size
                                                   :background (make-rgb-color 1 1 1)
                                                   :north north :south south :east east :west west
@@ -122,23 +120,6 @@
                                                   :min-height (+ north south size) :max-height (+ north south size)
                                                   :activate-callback #'on-team-icon-click)
 )
-
-; (defun make-team-button (team size &optional invert &key (north 0) (east 0) (south 0) (west 0))
-;   (let ( (main-color    (if invert (get-team-color-highlight team) (get-team-color-main team)))
-;          (second-color  (if invert (get-team-color-main team) (get-team-color-highlight team))) )
-;     (make-pane 'team-button :size size
-;                             :team team
-;                             :north north
-;                             :south south
-;                             :east east
-;                             :west west
-;                             :bg main-color
-;                             :hl second-color
-;                             :background main-color
-;                             :max-width (+ east west size)
-;                             :min-width (+ east west size)
-;                             :max-height (+ north south size)
-;                             :min-height size)))
 
 
 ;; %% TEAM ICON PANE ---------------------------------------------------------------------------------------------------
@@ -397,14 +378,6 @@
 (defun run-team (team) (run-frame-top-level (make-application-frame 'team-info :team team)))
 (defun run-game (game) (run-frame-top-level (make-application-frame 'game-info :game game)))
 (defun run-league () (run-frame-top-level (make-application-frame 'league-info)))
-
-; ;; Could we do this better? like with  `(member ,(mapcar #'car nfl-static-data:colors))
-; (define-presentation-method accept ((type nfl-db::team) stream view &key)
-;   (declare (ingore view))
-;   (let ( (team (accept `(member (:BUF :MIA :NE :NYJ :BAL :CIN :CLE :PIT :HOU :IND :JAX :TEN :DEN :KC :LV :LAC
-;                                  :DAL :NYG :PHI :WAS :CHI :DET :GB :MIN :ATL :CAR :NO :TB :ARI :LA :SF :SEA)))) )
-;     (format t "accept ~a: team = ~a~%" 'nfl-db::team team)
-;     (make-instance 'nfl-db::team team)))
 
 (define-league-info-command (com-show-team-schedule :menu t :name "Show Sched")
   ( (team 'nfl-db::team) )
