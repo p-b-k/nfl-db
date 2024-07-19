@@ -155,12 +155,15 @@
 
 (defclass game-score ()
   ( (home   :initform   '()
+            :initarg    :home
             :accessor   score-home)
     (away   :initform   '()
+            :initarg    :away
             :accessor   score-away) ))
 
 (defmethod score-totals ((s game-score))
   (with-slots (home away) s
+    (format t "score-totals: home = ~a, away = ~a~%" home away)
     (cons (apply #'+ away) (apply #'+ home))))
 
 (defmethod game-earlier ( (g1 game-data) (g2 game-data) )
@@ -189,20 +192,24 @@
     (if f
       (let ( (value (read f)) )
         (close f)
-        f)
+        value)
       nil)))
 
 (defmethod get-data-for-game ( (g game) field )
-  (format t "get-data-for-game: called on ~a, ~a~%" g field)
-  (format t "get-data-for-game: game away is ~a~%" (away-team g))
-  (format t "get-data-for-game: game home is ~a~%" (home-team g))
-  (format t "get-data-for-game: game week is ~a~%" (week-no g))
+; (format t "get-data-for-game: called on ~a, ~a~%" g field)
+; (format t "get-data-for-game: game away is ~a~%" (away-team g))
+; (format t "get-data-for-game: game home is ~a~%" (home-team g))
+; (format t "get-data-for-game: game week is ~a~%" (week-no g))
   (with-slots ( week-no away-id home-id ) g
     (let ( (game-day-file (format nil "data/cumulative/games/~2,'0d-~a-~a.game.~a.lisp"
                 week-no away-id home-id field)) )
-      (format t "get-data-for-game: game-day-file = ~a~%" game-day-file)
+;     (format t "get-data-for-game: game-day-file = ~a~%" game-day-file)
       (let ( (file (probe-file game-day-file)) )
-        (if file (read-value-from-file file) nil)))))
+        (if file
+          (let ( (result (read-value-from-file file)) )
+;           (format t "get-data-for-game: result = ~a~%" result)
+            result)
+          nil)))))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; The game weeks
@@ -255,12 +262,22 @@
          (time  (aref record 2))
          (airer (aref record 3)) )
     (let ( (data (make-instance 'game-data :week week-no :away-team (car teams) :home-team (cdr teams))) )
-      (if date (setf (game-day data) (make-instance 'game-date-data :year (aref date 0)
-                                                                    :month (aref date 1)
-                                                                    :day (aref date 2))))
-      (if time (setf (game-time data) (make-instance 'game-time-data :hour (aref time 0) :minute (aref time 1))))
-      (if airer (setf (game-airer data) (if (symbolp airer) (list airer) airer)))
-      data)))
+      (let ( (saved-date  (get-data-for-game data 'date))
+             (saved-time  (get-data-for-game data 'time))
+             (saved-away  (get-data-for-game data 'away-score))
+             (saved-home  (get-data-for-game data 'home-score))
+             (saved-airer (get-data-for-game data 'airer)) )
+        (if date (setf (game-day data)
+                       (make-instance 'game-date-data :year (aref date 0) :month (aref date 1) :day (aref date 2))))
+        (if saved-date (setf game-day data) saved-date)
+        (if time (setf (game-time data)
+                       (make-instance 'game-time-data :hour (aref time 0) :minute (aref time 1))))
+        (if saved-time (setf game-day time) saved-time)
+        (if airer (setf (game-airer data)
+                        (if (symbolp airer) (list airer) airer)))
+        (if saved-airer (setf game-airer time) saved-airer)
+        (setf (game-score data) (make-instance 'game-score :home saved-home :away saved-away))
+        data))))
 
 (defun rec-add-games-to-week (week-no games)
   (if games
