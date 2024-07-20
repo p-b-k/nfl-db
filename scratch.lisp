@@ -19,8 +19,9 @@
 (export 'load-data)
 
 (load-data)
-(load "nfl-tool.lisp")
 
+(load "nfl-constants.lisp")
+(load "nfl-tool.lisp")
 
 (defun start-listener () (clim-listener:run-listener))
 
