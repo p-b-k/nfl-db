@@ -33,7 +33,7 @@
 (defconstant +game-list-item-top-border-size+ 4)
 (defconstant +game-list-item-bottom-border-size+ 4)
 (defconstant +game-list-item-west-border-size+ 2)
-(defconstant +game-list-item-inner-border-size+ 2)
+(defconstant +game-list-item-inner-border-size+ 200)
 (defconstant +game-list-item-date-padding+ 4)
 
 (defconstant +game-day-info-x-offset+ (+ (* +icon-small+ 2)
@@ -48,6 +48,12 @@
 (defconstant +days-of-week+ #("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday"))
 (defconstant +months+ #("January" "February" "March" "April" "May" "June"
                         "July" "August" "September" "October" "November" "December"))
+
+(defun conference-logo-file (conference size)
+  (format nil "~a/nfl/~a/~a.png" +file-root/logos+ size (symbol-name conference)))
+
+(defun afc-logo-file (size) (conference-logo-file :afc size))
+(defun nfc-logo-file (size) (conference-logo-file :nfc size))
 
 (defun team-logo-file (team size)
   (format nil "~a/teams/logos/~ax~a/~a.png" +file-root/logos+ size size (symbol-name team)))
@@ -162,7 +168,7 @@
           (draw-rectangle* pane 6 6 far-off-x far-off-y
                                 :line-joint-shape :bevel
                                 :filled nil :line-thickness 4 :ink hl)
-          (draw-image* pane image east north))))))
+          (draw-image* pane image (/ (* 3 east) 4) north))))))
 
 ;; %% TEAM BANNER PANE -------------------------------------------------------------------------------------------------
 
@@ -209,8 +215,15 @@
 (defun draw-game-score-info (pane w h game)
   (if (game-score game)
     (let* ( (totals (score-totals (game-score game)))
-            (text (format nil "~2d ~2d" (car totals) (cdr totals))) )
-      (draw-text* pane text (floor w 2) (floor h 2) :align-y :center :x 200))))
+            (text (format nil "~2d : ~2d" (car totals) (cdr totals))) )
+      (draw-text* pane text (+ +icon-small+ (/ +game-list-item-inner-border-size+ 2)) (floor h 2)
+                  :align-y :center
+                  :align-x :center
+                  :text-size 30))
+    (draw-text* pane "To Be Played" (+ +icon-small+ (/ +game-list-item-inner-border-size+ 2)) (floor h 2)
+                  :align-y :center
+                  :align-x :center
+                  :text-size 20)))
 
 (defun draw-game-day-info (pane w h game)
   (let ( (day (game-day game)) )
@@ -390,7 +403,7 @@
   (:panes (nfc (make-conference-pane :nfc))
           (afc (make-conference-pane :afc))
           (interactor :interactor))
-  (:layouts (default (vertically () (horizontally () afc nfc))))
+  (:layouts (default (vertically () interactor (horizontally () afc nfc))))
   (:menu-bar t))
 
 (defun run-team (team) (run-frame-top-level (make-application-frame 'team-info :team team)))
@@ -398,7 +411,8 @@
 (defun run-league () (run-frame-top-level (make-application-frame 'league-info)))
 
 (define-league-info-command (com-show-team-schedule :menu t :name "Show Sched")
-  ( (team 'nfl-db::team) )
+; ( (team 'nfl-db::team) )
+  ( (team 'keyword) )
   (format t "com-show-team-schedule: team = ~a~%" team)
   (run-frame-top-level (make-application-frame 'team-info :team team))
 )

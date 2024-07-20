@@ -187,6 +187,10 @@
 ;; Methods to store and retrive accumulated data from the season
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+(defun file-for-game-data-field (g field)
+  (with-slots (week-no away-id home-id) g
+    (format nil "data/cumulative/games/~2,'0d-~a-~a.game.~a.lisp" week-no away-id home-id field)))
+
 (defun read-value-from-file (file)
   (let ( (f (open file :if-does-not-exist nil)) )
     (if f
@@ -195,21 +199,16 @@
         value)
       nil)))
 
+(defun write-value-to-file (file value)
+  (with-open-file (s file :direction :output :if-exists :supersede)
+    (format s "~s" value)))
+
 (defmethod get-data-for-game ( (g game) field )
-; (format t "get-data-for-game: called on ~a, ~a~%" g field)
-; (format t "get-data-for-game: game away is ~a~%" (away-team g))
-; (format t "get-data-for-game: game home is ~a~%" (home-team g))
-; (format t "get-data-for-game: game week is ~a~%" (week-no g))
-  (with-slots ( week-no away-id home-id ) g
-    (let ( (game-day-file (format nil "data/cumulative/games/~2,'0d-~a-~a.game.~a.lisp"
-                week-no away-id home-id field)) )
-;     (format t "get-data-for-game: game-day-file = ~a~%" game-day-file)
-      (let ( (file (probe-file game-day-file)) )
-        (if file
-          (let ( (result (read-value-from-file file)) )
-;           (format t "get-data-for-game: result = ~a~%" result)
-            result)
-          nil)))))
+  (let ( (game-day-file (file-for-game-data-field g field)) )
+    (let ( (file (probe-file game-day-file)) )
+      (if file
+        (read-value-from-file file)
+        nil))))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; The game weeks
@@ -276,7 +275,8 @@
         (if airer (setf (game-airer data)
                         (if (symbolp airer) (list airer) airer)))
         (if saved-airer (setf game-airer time) saved-airer)
-        (setf (game-score data) (make-instance 'game-score :home saved-home :away saved-away))
+        (if (or saved-home saved-away)
+          (setf (game-score data) (make-instance 'game-score :home saved-home :away saved-away)))
         data))))
 
 (defun rec-add-games-to-week (week-no games)

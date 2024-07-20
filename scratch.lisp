@@ -6,16 +6,16 @@
 (ql:quickload "clim-examples")
 (ql:quickload "clim-listener")
 
-(defpackage :app (:use :clim :clim-lisp) (:export run-app))
+(load "nfl-db.lisp")
+(load "nfl-static-data.lisp")
+
+(defpackage :app (:use :clim :clim-lisp :nfl-static-data) (:export run-app))
 
 (in-package :app)
 
 (defun run-app () (run-frame-top-level (make-application-frame 'superapp)))
 
-(load "nfl-db.lisp")
-(load "nfl-static-data.lisp")
-
-(defun load-data () (nfl-db::load-data nfl-static-data:schedule nfl-static-data:league nfl-static-data:colors))
+(defun load-data () (nfl-db::load-data schedule league colors))
 (export 'load-data)
 
 (load-data)
@@ -25,62 +25,55 @@
 (defun start-listener () (clim-listener:run-listener))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;; Try out presentation types
-;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;; Populate mock score data
 
-; (define-presentation-method accept ((type nfl-db::team) stream view &key)
-;   (let ( (team-id (accept '(member buf mia ne nyj bal cin cle pit hou ind jax ten den kc lv lac
-;                                    dal nyg phi was chi det gb min atl car no tb ari la sf sea)
-;                           :stream stream
-;                           :prompt "?")) )
-;     (make-team team-id)))
+(defun apply-to-week (f idx weeks)
+; (format t "apply-to-week: called on idx = ~a~%" idx)
+  (if (< idx 18)
+    ;; Figure out how to do this better
+    (let ( (func (lambda (x)
+                    (format t "calling lambda on ~a~%" x)
+                    (apply f (list idx (car (aref x 0)) (cdr (aref x 0)))))) )
+      (mapcar func (aref weeks idx))
+      (format t "apply-to-week: finished apply function for week ~a~%" idx)
+      (apply-to-week f (+ 1 idx) weeks))))
 
-; (in-package :clim-user)
+(defun week-map (f weeks)
+  (apply-to-week f 0 weeks))
 
-; (define-presentation-type ticket ())
+(defun next-score ()
+  (let ( (rstate (make-random-state t)) )
+    ;; Field Goal?
+    (if (> 40 (random 100 rstate))
+      3
+      ;; Touchdown?
+      (if (> 20 (random 100))
+        ;; Extra Point
+        (if (> 98 (random 100))
+          7
+          ;; Go for 2, or just take the 6
+          (if (> 70 (random 100)) 8 6))
+        ;; A Safety perhaps?
+        (if (> 8 (random 100)) 2 0)))))
+          
+(defun rand-quarter-score (sofar)
+  (let ( (pts (next-score)) )
+    (if (> pts 0)
+      (rand-quarter-score (+ pts sofar))
+      sofar)))
 
-; (setf (get 'bush 'party) 'republican)
-; (setf (get 'quayle 'party) 'republican)
-; (setf (get 'clinton 'party) 'democrat)
-; (setf (get 'gore 'party) 'democrat)
+(defun generate-random-score ()
+  `(,(rand-quarter-score 0) ,(rand-quarter-score 0) ,(rand-quarter-score 0) ,(rand-quarter-score 0)))
 
-; ;;; separated by comma version
-; (define-presentation-method accept ((type ticket) stream view &key &allow-other-keys)
-;   (declare (ignore view))
-;   (let ( (president (accept '(member bush clinton)
-;                            :stream stream
-;                            :prompt nil
-;                            ;; add comma as a completing delimiter
-;                            :blip-characters '(#\,))) )
-;     ;; Make sure that the names were separated by a comma
-;     (unless (eql (read-gesture :stream stream) #\,) (simple-parse-error "Ticket members must be separated by commas"))
+(defun write-random-game-score (week-no away-id home-id)
+  (format t "write-random-game-score: calling on ~a, ~a, ~a~%" week-no away-id home-id)
+  (let ( (g (make-instance 'nfl-db::game :week week-no :home-team home-id :away-team away-id)) )
+    (format t "write-random-game-score: game = ~s~%" g)
+    (let ( (home-score-file (nfl-db::file-for-game-data-field g 'home-score))
+           (away-score-file (nfl-db::file-for-game-data-field g 'away-score)) )
+      (nfl-db::write-value-to-file home-score-file (generate-random-score))
+      (nfl-db::write-value-to-file away-score-file (generate-random-score)))))
 
-;     (let ((veep (accept '(member quayle gore) :stream stream :prompt nil)))
-;       ;; Validate party affiliations
-;       (unless (eql (get president 'party) (get veep 'party))
-;         (simple-parse-error "Ticket members must be of the same party"))
+(defun create-demo-data ()
+  (week-map #'write-random-game-score schedule))
 
-;       (list president veep))))
-
-; ;;; Separated by Return version
-; (define-presentation-method accept ((type ticket) stream view &key
-;                                    &allow-other-keys)
-;  (declare (ignore view))
-;  (let ((president (accept '(member bush clinton)
-;                           :stream stream
-;                           :prompt nil
-;                           ;; Remove Newline from activation characters
-;                           :activation-characters `()
-;                           ;; Add Newline as a delimiter, so that we get
-;                           ;; completion and move-to-next-field behavior
-;                           ;; when Return is typed.
-;                           :blip-characters `(#\Return #\Newline))))
-;    (unless (eql (read-gesture :stream stream) #\Newline)
-;      (simple-parse-error "Ticket members must be entered on separate lines"))
-
-;    (let ( (veep (accept '(member quayle gore) :stream stream :prompt nil)) )
-;      ;; Validate party affiliations
-;      (unless (eql (get president 'party) (get veep 'party))
-;        (simple-parse-error "Ticket members must be of the same party"))
-
-;      (list president veep))))
