@@ -66,7 +66,7 @@
 (defconstant +game-list-item-bottom-border-size+ 4)
 (defconstant +game-list-item-west-border-size+ 2)
 (defconstant +game-list-item-inner-border-size+ 200)
-(defconstant +game-list-item-date-padding+ 4)
+(defconstant +game-list-item-date-padding+ 12)
 
 (defconstant +game-day-info-x-offset+ (+ (* +icon-small+ 2)
                                          +game-list-item-west-border-size+
