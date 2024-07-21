@@ -164,13 +164,13 @@
 
 ;; %% GAME PANE --------------------------------------------------------------------------------------------------------
 
-(defclass game-pane (clim-stream-pane)
+(defclass old-game-pane (clim-stream-pane)
   ( (game :initarg :game) )
 )
 
-(defun make-game-pane (game)
+(defun make-old-game-pane (game)
   (let ( (total-height (+ +icon-small+ +game-list-item-top-border-size+ +game-list-item-bottom-border-size+)) )
-    (make-pane 'game-pane :game game
+    (make-pane 'old-game-pane :game game
                           :background (if game +main-bg-color+ +bye-bg-color+)
                           :min-height (if game total-height (/ +icon-small+ 2))
                           :max-height (if game total-height (/ +icon-small+ 2))
@@ -232,7 +232,7 @@
             (draw-image* pane airer-icon (- w +game-airer-info-x-offset+) (+ +game-list-item-top-border-size+
                                                                           (/ +icon-xsmall+ 2)))))))))
 
-(defmethod handle-repaint ((pane game-pane) region)
+(defmethod handle-repaint ((pane old-game-pane) region)
   (with-slots (game) pane
     (let ( (w (bounding-rectangle-width  pane))
            (h (bounding-rectangle-height pane)) )
@@ -312,7 +312,7 @@
 (defun make-team-schedule-pane (team)
   (let ( (games (team-schedule team)) )
     (make-pane :vbox-pane
-               :contents (mapcar #'make-game-pane games))))
+               :contents (mapcar #'make-old-game-pane games))))
 
 ;; %% LEAGUE (ALL THE TEAMS) PANE --------------------------------------------------------------------------------------
 
@@ -360,7 +360,7 @@
 
 (define-application-frame game-info ()
   ( (game :initarg :game) )
-  (:pane (with-slots (game) *application-frame* (make-game-pane game)))
+  (:pane (with-slots (game) *application-frame* (make-old-game-pane game)))
   (:menu-bar nil))
 
 (define-application-frame league-info ()
@@ -376,7 +376,6 @@
 (defun run-league () (run-frame-top-level (make-application-frame 'league-info)))
 
 (define-league-info-command (com-show-team-schedule :menu t :name "Show Sched")
-; ( (team 'nfl-db::team) )
   ( (team 'keyword) )
   (format t "com-show-team-schedule: team = ~a~%" team)
   (run-frame-top-level (make-application-frame 'team-info :team team))
