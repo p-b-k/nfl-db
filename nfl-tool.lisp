@@ -191,13 +191,10 @@
                   :text-size 20)))
 
 (defun draw-game-day-info (pane w h game)
-  (let ( (day (game-day game)) )
-    (if day
+  (let ( (dday (game-dday game)) )
+    (if dday
       (multiple-value-bind (secs mins hours day month year day-of-week dst tz)
-                           (decode-universal-time
-                              (encode-universal-time 0 0 0 (nfl-db::game-date-day day)
-                                                           (nfl-db::game-date-month day)
-                                                           (nfl-db::game-date-year day)))
+                           (decode-universal-time dday)
         (let ( (text (format nil "~a, ~a ~d ~d"
                              (aref +days-of-week+ day-of-week)
                              (aref +months+ (1- month))
@@ -206,12 +203,12 @@
           (draw-text* pane text +game-day-info-x-offset+ (/ (* 3 h) 4)))))))
 
 (defun draw-game-time-info (pane w h game)
-  (let ( (tm (game-time game)) )
-    (if tm
-      (let* ( (hr (nfl-db::game-time-hour tm))
-              (mn (nfl-db::game-time-minute tm))
-              (text (format nil "~d:~2,'0d ~a" (if (< hr 12) hr (- hr 12)) mn (if (< hr 12) 'AM 'PM))) )
-        (draw-text* pane text +game-day-info-x-offset+ (/ h 3))))))
+  (let ( (dday (game-dday game)) )
+    (if dday
+      (multiple-value-bind (secs mn hr day month year day-of-week dst tz)
+                           (decode-universal-time dday)
+        (let ( (text (format nil "~d:~2,'0d ~a" (if (< hr 12) hr (- hr 12)) mn (if (< hr 12) 'AM 'PM))) )
+          (draw-text* pane text +game-day-info-x-offset+ (/ h 3)))))))
 
 (defun draw-game-airer-info (pane w h game)
   (let ( (airer (nfl-db::game-airer game)) )
