@@ -5,42 +5,13 @@
 (ql:quickload "clim-examples")
 (ql:quickload "local-time")
 
-(defpackage #:nfl-tool (:use #:nfl-db #:nfl-constants #:clim #:clim-lisp #:clim-render))
+(defpackage #:nfl-tool (:use #:nfl-db
+                             #:nfl-constants
+                             #:nfl-team-pane
+                             #:clim
+                             #:clim-lisp
+                             #:clim-render))
 (in-package #:nfl-tool)
-
-;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;; Some helper functions
-;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-(defconstant +file-root/logos+ "data/static/png")
-
-(defun conference-logo-file (conference size)
-  (format nil "~a/nfl/~a/~a.png" +file-root/logos+ size (symbol-name conference)))
-
-(defun afc-logo-file (size) (conference-logo-file :afc size))
-(defun nfc-logo-file (size) (conference-logo-file :nfc size))
-
-(defun team-logo-file (team size)
-  (format nil "~a/teams/logos/~ax~a/~a.png" +file-root/logos+ size size (symbol-name team)))
-
-(defun get-team-color-main (team)
-  (let ( (color (car (team-colors team))) )
-     (make-rgb-color (/ (aref color 0) 255) (/ (aref color 1) 255) (/ (aref color 2) 255))))
-
-(defun get-team-color-highlight (team)
-  (let ( (color (car (cdr (team-colors team)))) )
-     (make-rgb-color (/ (aref color 0) 255) (/ (aref color 1) 255) (/ (aref color 2) 255))))
-
-(defun resolve-airer-png-name (airer)
-  (cond
-    ( (eq airer :espn+) "ESPN_plus" )
-    ( (eq airer :netflix) "Netflix" )
-    ( (eq airer :peacock) "Peacock" )
-    ( (eq airer :prime) "Prime" )
-    ( t (symbol-name airer) )))
-
-(defun airer-logo-file (airer size)
-  (format nil "~a/networks/~a/~a.png" +file-root/logos+ size (resolve-airer-png-name airer)))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Create Presentation Methods
@@ -92,48 +63,6 @@
                                                   :activate-callback #'on-team-icon-click)
 )
 
-
-;; %% TEAM ICON PANE ---------------------------------------------------------------------------------------------------
-
-(defclass team-icon-pane (clim-stream-pane)
-  ( (team  :initarg :team)
-    (size  :initarg :size)
-    (north :initarg :north)
-    (south :initarg :south)
-    (east  :initarg :east)
-    (west  :initarg :west)
-    (bg    :initarg :bg)
-    (hl    :initarg :hl) )
-)
-
-(defun make-team-icon-pane (team size &optional invert &key (north 0) (east 0) (south 0) (west 0))
-  (let ( (main-color    (if invert (get-team-color-highlight team) (get-team-color-main team)))
-         (second-color  (if invert (get-team-color-main team) (get-team-color-highlight team))) )
-    (make-pane 'team-icon-pane :size size
-                               :team team
-                               :north north
-                               :south south
-                               :east east
-                               :west west
-                               :bg second-color
-                               :hl main-color
-;                              :background main-color
-                               :background (make-rgb-color 1 1 1)
-                               :max-width (+ east west size)
-                               :min-width (+ east west size)
-                               :max-height (+ north south size)
-                               :min-height size)))
-
-(defmethod handle-repaint ((pane team-icon-pane) region)
-  (with-slots (team size hl north south east west) pane
-    (let ( (image (make-pattern-from-bitmap-file (team-logo-file team size))) )
-      (clim:updating-output (pane)
-        (let ( (far-off-x (- (+ size east west) 7))
-               (far-off-y (- (+ size north south) 7)) )
-          (draw-rectangle* pane 6 6 far-off-x far-off-y
-                                :line-joint-shape :bevel
-                                :filled nil :line-thickness 4 :ink hl)
-          (draw-image* pane image (/ (* 3 east) 4) north))))))
 
 ;; %% TEAM BANNER PANE -------------------------------------------------------------------------------------------------
 
@@ -326,11 +255,6 @@
                                                         :north +team-icon-border+ :east +team-icon-border+
                                                         :west +team-icon-border+ :south +team-icon-border+))
                           teams)
-;            :contents (mapcar
-;                         (lambda (x) (make-team-icon-pane (team-id x) +icon-small+ nil
-;                                                          :north +team-icon-border+ :east +team-icon-border+
-;                                                          :west +team-icon-border+ :south +team-icon-border+))
-;                         teams)
   ))
 
 (defun make-conference-pane (conf)

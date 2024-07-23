@@ -4,7 +4,7 @@
 ;; Constants for UI spacing and such
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defpackage #:nfl-constants (:use #:clim #:clim-lisp))
+(defpackage #:nfl-constants (:use #:nfl-db #:clim #:clim-lisp))
 (in-package #:nfl-constants)
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -42,9 +42,21 @@
 (export '+days-of-week+)
 (export '+months+)
 
+
+(export 'conference-logo-file)
+(export 'afc-logo-file)
+(export 'nfc-logo-file)
+(export 'team-logo-file)
+(export 'get-team-color-main)
+(export 'get-team-color-highlight)
+(export 'resolve-airer-png-name)
+(export 'airer-logo-file)
+
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Definitions
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+(defconstant +file-root/logos+ "data/static/png")
 
 (defconstant +icon-xsmall+ 32)
 (defconstant +icon-small+  64)
@@ -80,5 +92,33 @@
 (defconstant +days-of-week+ #("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday"))
 (defconstant +months+ #("January" "February" "March" "April" "May" "June"
                         "July" "August" "September" "October" "November" "December"))
+
+(defun conference-logo-file (conference size)
+  (format nil "~a/nfl/~a/~a.png" +file-root/logos+ size (symbol-name conference)))
+
+(defun afc-logo-file (size) (conference-logo-file :afc size))
+(defun nfc-logo-file (size) (conference-logo-file :nfc size))
+
+(defun team-logo-file (team size)
+  (format nil "~a/teams/logos/~ax~a/~a.png" +file-root/logos+ size size (symbol-name team)))
+
+(defun get-team-color-main (team)
+  (let ( (color (car (team-colors team))) )
+     (make-rgb-color (/ (aref color 0) 255) (/ (aref color 1) 255) (/ (aref color 2) 255))))
+
+(defun get-team-color-highlight (team)
+  (let ( (color (car (cdr (team-colors team)))) )
+     (make-rgb-color (/ (aref color 0) 255) (/ (aref color 1) 255) (/ (aref color 2) 255))))
+
+(defun resolve-airer-png-name (airer)
+  (cond
+    ( (eq airer :espn+) "ESPN_plus" )
+    ( (eq airer :netflix) "Netflix" )
+    ( (eq airer :peacock) "Peacock" )
+    ( (eq airer :prime) "Prime" )
+    ( t (symbol-name airer) )))
+
+(defun airer-logo-file (airer size)
+  (format nil "~a/networks/~a/~a.png" +file-root/logos+ size (resolve-airer-png-name airer)))
 
 
