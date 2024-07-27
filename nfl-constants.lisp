@@ -121,4 +121,3 @@
 (defun airer-logo-file (airer size)
   (format nil "~a/networks/~a/~a.png" +file-root/logos+ size (resolve-airer-png-name airer)))
 
-

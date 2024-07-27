@@ -8,6 +8,7 @@
 (defpackage #:nfl-tool (:use #:nfl-db
                              #:nfl-constants
                              #:nfl-team-pane
+                             #:nfl-game-frame
                              #:clim
                              #:clim-lisp
                              #:clim-render))
@@ -99,12 +100,14 @@
 
 (defun make-old-game-pane (game)
   (let ( (total-height (+ +icon-small+ +game-list-item-top-border-size+ +game-list-item-bottom-border-size+)) )
-    (make-pane 'old-game-pane :game game
-                          :background (if game +main-bg-color+ +bye-bg-color+)
-                          :min-height (if game total-height (/ +icon-small+ 2))
-                          :max-height (if game total-height (/ +icon-small+ 2))
-                          :min-width  (* 6 +icon-small+)
-    )))
+;   (make-pane 'old-game-pane :game game
+;                         :background (if game +main-bg-color+ +bye-bg-color+)
+;                         :min-height (if game total-height (/ +icon-small+ 2))
+;                         :max-height (if game total-height (/ +icon-small+ 2))
+;                         :min-width  (* 6 +icon-small+)
+;   )
+    (make-application-frame 'game-frame :game game)
+  ))
 
 (defun draw-game-score-info (pane w h game)
   (if (game-score game)
@@ -289,12 +292,16 @@
   (:panes (nfc (make-conference-pane :nfc))
           (afc (make-conference-pane :afc))
           (interactor :interactor))
-  (:layouts (default (vertically () interactor (horizontally () afc nfc))))
+  (:layouts (default (vertically () (horizontally () afc nfc))))
   (:menu-bar t))
 
 (defun run-team (team) (run-frame-top-level (make-application-frame 'team-info :team team)))
 (defun run-game (game) (run-frame-top-level (make-application-frame 'game-info :game game)))
 (defun run-league () (run-frame-top-level (make-application-frame 'league-info)))
+
+(export 'run-team)
+(export 'run-game)
+(export 'run-league)
 
 (define-league-info-command (com-show-team-schedule :menu t :name "Show Sched")
   ( (team 'keyword) )
