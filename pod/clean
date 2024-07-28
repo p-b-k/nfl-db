@@ -1,0 +1,18 @@
+#!/bin/bash
+########################################################################################################################
+##  Run the docker image
+########################################################################################################################
+
+cd $(dirname $0)
+. ./env
+
+for container in $($PODMAN container ls --all | grep -v 'CONTAINER' | awk '{print $1}'); do
+# echo "Removing container $($PODMAN container inspect -f '{{.ImageName}}' $container)"
+  $PODMAN container rm $container
+done
+
+for image in $($PODMAN image ls --all | grep -v 'REPOSITORY' | awk '{print $3}'); do
+# echo "Removing image $($PODMAN image inspect -f '{{.ImageName}}' $image)"
+  $PODMAN image rm $image
+done
+

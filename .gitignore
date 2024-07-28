@@ -1,4 +1,5 @@
 data/static/png/teams
 data/static/png/networks
 data/static/png/nfl
+pod/stage
 .*
