@@ -1,6 +1,6 @@
 FROM  ubuntu
 RUN   apt-get update
-RUN   apt-get install -y sbcl curl
+RUN   apt-get install -y sbcl curl librsvg2-bin
 RUN   curl -O https://beta.quicklisp.org/quicklisp.lisp
 RUN   sbcl --load quicklisp.lisp --eval "(quicklisp-quickstart:install)" \
                                  --eval "(exit)"

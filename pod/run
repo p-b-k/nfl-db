@@ -6,7 +6,7 @@
 cd $(dirname $0)
 . ./env
 
-$PODMAN run-it --rm --name $IMAGE_TAG
+$PODMAN run -it --rm --name $IMAGE_TAG \
   -u 0 \
   -e DISPLAY="$DISPLAY" \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
