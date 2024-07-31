@@ -22,8 +22,8 @@
 (load "nfl-game-status-pane.lisp")
 (load "nfl-game-airer-pane.lisp")
 
-;; Now that all of the sub-components are loaded, load the game-frame
-(load "nfl-game-frame.lisp")
+;; Now that all of the sub-components are loaded, load the game-pane
+(load "nfl-game-pane.lisp")
 
 ;; Finally, load the tool
 (load "nfl-tool.lisp")

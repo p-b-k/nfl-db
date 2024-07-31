@@ -8,7 +8,7 @@
 (defpackage #:nfl-tool (:use #:nfl-db
                              #:nfl-constants
                              #:nfl-team-pane
-                             #:nfl-game-frame
+                             #:nfl-game-pane
                              #:clim
                              #:clim-lisp
                              #:clim-render))
@@ -100,13 +100,13 @@
 
 (defun make-old-game-pane (game)
   (let ( (total-height (+ +icon-small+ +game-list-item-top-border-size+ +game-list-item-bottom-border-size+)) )
-    (make-pane 'old-game-pane :game game
-                          :background (if game +main-bg-color+ +bye-bg-color+)
-                          :min-height (if game total-height (/ +icon-small+ 2))
-                          :max-height (if game total-height (/ +icon-small+ 2))
-                          :min-width  (* 6 +icon-small+)
-    )
-;   (make-application-frame 'game-frame :game game)
+;   (make-pane 'old-game-pane :game game
+;                         :background (if game +main-bg-color+ +bye-bg-color+)
+;                         :min-height (if game total-height (/ +icon-small+ 2))
+;                         :max-height (if game total-height (/ +icon-small+ 2))
+;                         :min-width  (* 6 +icon-small+)
+;   )
+    (make-game-pane game)
   ))
 
 (defun draw-game-score-info (pane w h game)

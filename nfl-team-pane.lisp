@@ -56,4 +56,3 @@
                                 :filled nil :line-thickness 4 :ink hl)
           (draw-image* pane image (/ (* 3 east) 4) north))))))
 
-
