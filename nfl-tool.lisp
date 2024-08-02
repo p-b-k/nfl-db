@@ -99,6 +99,7 @@
 )
 
 (defun make-old-game-pane (game)
+  (format t "calling make-old-game-pane on game ~a~%" game)
   (let ( (total-height (+ +icon-small+ +game-list-item-top-border-size+ +game-list-item-bottom-border-size+)) )
 ;   (make-pane 'old-game-pane :game game
 ;                         :background (if game +main-bg-color+ +bye-bg-color+)

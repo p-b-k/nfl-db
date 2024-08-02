@@ -9,6 +9,8 @@
                                      #:clim-render))
 (in-package #:nfl-score-button)
 
+(export 'make-score-button)
+
 (defclass score-button (push-button-pane)
   ( (game  :initarg :game)  ;; The game data
     (side  :initarg :side)  ;; Which "Side" (:home or :away)

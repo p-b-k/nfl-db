@@ -21,6 +21,9 @@
 (export 'game-score)         ;; accessor or the score of the game
 (export 'game-airer)         ;; accessor or the airer of the game
 
+(export 'home-team)          ;; accessor or the home team of a game
+(export 'away-team)          ;; accessor or the away team of a game
+
 (export 'score-totals)       ;; the total scores (away . home) for a game
 
 (export 'division-teams)     ;; The teams in a given division

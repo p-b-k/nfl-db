@@ -10,7 +10,11 @@
 (in-package #:nfl-game-airer-pane)
 
 (export 'game-airer-pane)
+(export 'make-airer-pane)
 
 (defclass game-airer-pane (clim-stream-pane)
-  ( (game     :initarg    :game) ))
+  ( (airer     :initarg    :airer    :initform nil) ))
+
+(defun make-airer-pane (game)
+  (make-pane 'game-airer-pane :airer (game-airer game)))
 

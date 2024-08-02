@@ -10,6 +10,7 @@
 (in-package #:nfl-game-time-pane)
 
 (export 'game-time-pane)
+(export 'make-game-time-pane)
 
 ;; %% GAME TIME ICON PANE ----------------------------------------------------------------------------------------------
 
@@ -35,5 +36,5 @@
 
 (defun make-game-time-pane (game)
   (let ( (total-height (+ +icon-small+ +game-list-item-top-border-size+ +game-list-item-bottom-border-size+)) )
-    (make-pane 'game-time-pane :game (game-dday game))))
+    (make-pane 'game-time-pane :date (game-dday game))))
 

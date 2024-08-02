@@ -11,7 +11,12 @@
 (in-package #:nfl-game-time-pane)
 
 (export 'game-status-pane)
+(export 'make-status-pane)
 
 (defclass game-status-pane (clim-stream-pane)
   ( (game     :initarg    :game) ))
+
+(defun make-status-pane (game)
+  (let ( (total-height (+ +icon-small+ +game-list-item-top-border-size+ +game-list-item-bottom-border-size+)) )
+    (make-pane 'game-status-pane :game game)))
 
