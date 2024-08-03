@@ -42,7 +42,6 @@
 (export '+days-of-week+)
 (export '+months+)
 
-
 (export 'conference-logo-file)
 (export 'afc-logo-file)
 (export 'nfc-logo-file)

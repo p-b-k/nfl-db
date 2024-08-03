@@ -24,7 +24,10 @@
 (export 'home-team)          ;; accessor or the home team of a game
 (export 'away-team)          ;; accessor or the away team of a game
 
+(export 'score)              ;; the slot name for the game score (exporting to prevent crap later)
 (export 'score-totals)       ;; the total scores (away . home) for a game
+(export 'score-home)         ;; The home team portion of a game score
+(export 'score-away)         ;; The away team portion of a game score
 
 (export 'division-teams)     ;; The teams in a given division
 (export 'conference-teams)   ;; The teams in a givin conference
