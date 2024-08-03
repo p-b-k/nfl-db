@@ -2,7 +2,7 @@
 ;; Database of NFL Season info
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; (ql:quickload "clim-examples")
+(ql:quickload "local-time")
 
 (defpackage #:nfl-db (:use #:cl))
 (in-package #:nfl-db)
@@ -17,10 +17,12 @@
 (export 'team-div-name)      ;; psuedo getter for the combined conference and division of a team (e.g. "NFC East")
 (export 'team-lookup)        ;; looks up a team from a team id and returns it, or nil
 
-(export 'game-day)           ;; accessor or the date of the game
-(export 'game-time)          ;; accessor or the time of the game
+(export 'game-dday)          ;; accessor or the date and time of the game
 (export 'game-score)         ;; accessor or the score of the game
 (export 'game-airer)         ;; accessor or the airer of the game
+
+(export 'home-team)          ;; accessor or the home team of a game
+(export 'away-team)          ;; accessor or the away team of a game
 
 (export 'score-totals)       ;; the total scores (away . home) for a game
 
@@ -105,12 +107,9 @@
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 (defclass game-data (game)
-  ( (date   :initarg    :data
+  ( (dday   :initarg    :data
             :initform   nil
-            :accessor   game-day)
-    (time   :initarg    :time
-            :initform   nil
-            :accessor   game-time)
+            :accessor   game-dday)
     (airer  :initargs   :airer
             :initform   nil
             :accessor   game-airer)
@@ -119,39 +118,6 @@
 )
 
 (defun game-id (g) (list (week-no g) (home-team g) (away-team g)))
-
-(defclass game-date-data ()
-  ( (year   :initarg    :year
-            :accessor   game-date-year)
-    (month  :initarg    :month
-            :accessor   game-date-month)
-    (day    :initarg    :day
-            :accessor   game-date-day) )
-)
-
-(defmethod game-date-eqp ( (d1 game-date-data) (d2 game-date-data) )
-  (and (eq (game-date-year d1) (game-date-year d2))
-       (eq (game-date-month d1) (game-date-month d2))
-       (eq (game-date-day d1) (game-date-day d2))))
-
-(defmethod game-date-earlier ( (d1 game-date-data) (d2 game-date-data) )
-  (if (eq (game-date-year d1) (game-date-year d2))
-    (if (eq (game-date-month d1) (game-date-month d2))
-      (< (game-date-day d1) (game-date-day d2))
-      (< (game-date-month d1) (game-date-month d2)))
-    (< (game-date-year d1) (game-date-year d2))))
-
-(defclass game-time-data ()
-  ( (hour   :initarg    :hour
-            :accessor   game-time-hour)
-    (minute :initarg    :minute
-            :accessor   game-time-minute) )
-)
-
-(defmethod game-time-earlier ( (d1 game-time-data) (d2 game-time-data) )
-  (if (eq (game-time-hour d1) (game-time-hour d2))
-    (< (game-time-minute d1) (game-time-minute d2))
-    (< (game-time-hour d1) (game-time-hour d2))))
 
 (defclass game-score ()
   ( (home   :initform   '()
@@ -167,21 +133,16 @@
     (cons (apply #'+ away) (apply #'+ home))))
 
 (defmethod game-earlier ( (g1 game-data) (g2 game-data) )
-  (let ( (d1 (game-day g1))
-         (d2 (game-day g2)) )
-    (if (and d1 d2)
-      (if (game-date-eqp (game-day g1) (game-day g2))
-        (let ( (t1 (game-time g1))
-               (t2 (game-time g2)) )
-          (if (and t1 t2)
-            (game-time-earlier (game-time g1) (game-time g2))
-            (if (and (not t1) (not t2))
-              nil
-              t1)))
-        (game-date-earlier (game-day g1) (game-day g2)))
-      (if (and (not d1) (not d2))
-        nil
-        d1))))
+  (with-slots ( (dday1 dday) (home1 home-id) ) g1
+    (with-slots ( (dday2 dday) (home2 home-id) ) g2
+      (if dday1
+        (if dday2
+          (local-time:timestamp< (local-time:universal-to-timestamp dday1)
+                                 (local-time:universal-to-timestamp dday2))
+          t)
+        (if dday2
+          nil
+          (string< home1 home2))))))
 
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;; Methods to store and retrive accumulated data from the season
@@ -204,8 +165,8 @@
     (format s "~s" value)))
 
 (defmethod get-data-for-game ( (g game) field )
-  (let ( (game-day-file (file-for-game-data-field g field)) )
-    (let ( (file (probe-file game-day-file)) )
+  (let ( (game-field-file (file-for-game-data-field g field)) )
+    (let ( (file (probe-file game-field-file)) )
       (if file
         (read-value-from-file file)
         nil))))
@@ -255,26 +216,25 @@
   (push-game game week-no)
   (sort-week week-no))
 
+(defun make-dday-from-date-and-time (date time)
+  (encode-universal-time 0 (aref time 1) (aref time 0) (aref date 2) (aref date 1) (aref date 0)))
+
 (defun game-from-record (week-no record)
   (let ( (teams (aref record 0))
          (date  (aref record 1))
          (time  (aref record 2))
          (airer (aref record 3)) )
     (let ( (data (make-instance 'game-data :week week-no :away-team (car teams) :home-team (cdr teams))) )
-      (let ( (saved-date  (get-data-for-game data 'date))
-             (saved-time  (get-data-for-game data 'time))
+      (let ( (saved-dday  (get-data-for-game data 'dday))
              (saved-away  (get-data-for-game data 'away-score))
              (saved-home  (get-data-for-game data 'home-score))
              (saved-airer (get-data-for-game data 'airer)) )
-        (if date (setf (game-day data)
-                       (make-instance 'game-date-data :year (aref date 0) :month (aref date 1) :day (aref date 2))))
-        (if saved-date (setf game-day data) saved-date)
-        (if time (setf (game-time data)
-                       (make-instance 'game-time-data :hour (aref time 0) :minute (aref time 1))))
-        (if saved-time (setf game-day time) saved-time)
-        (if airer (setf (game-airer data)
-                        (if (symbolp airer) (list airer) airer)))
+        (if (and date time) (setf (game-dday data) (make-dday-from-date-and-time date time)))
+        (if saved-dday (setf (game-dday data) saved-dday))
+
+        (if airer (setf (game-airer data) (if (symbolp airer) (list airer) airer)))
         (if saved-airer (setf game-airer time) saved-airer)
+
         (if (or saved-home saved-away)
           (setf (game-score data) (make-instance 'game-score :home saved-home :away saved-away)))
         data))))

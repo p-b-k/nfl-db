@@ -2,14 +2,9 @@
 ;; Scratch file for NFL stuff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; (require "adsf")
-(ql:quickload "clim-examples")
-(ql:quickload "clim-listener")
+(load "nfl-load.lisp")
 
-(load "nfl-db.lisp")
-(load "nfl-static-data.lisp")
-
-(defpackage :app (:use :clim :clim-lisp :nfl-static-data) (:export run-app))
+(defpackage :app (:use :clim :clim-lisp :nfl-db :nfl-static-data) (:export run-app))
 
 (in-package :app)
 
@@ -17,10 +12,6 @@
 
 (defun load-data () (nfl-db::load-data schedule league colors))
 (export 'load-data)
-
-(load-data)
-(load "nfl-tool.lisp")
-
 
 (defun start-listener () (clim-listener:run-listener))
 
@@ -76,4 +67,7 @@
 
 (defun create-demo-data ()
   (week-map #'write-random-game-score schedule))
+
+(defconstant sample-game (car (schedule-week 0)))
+(export 'sample-game)
 

@@ -1,0 +1,18 @@
+#!/bin/bash
+########################################################################################################################
+##  Build the docker iamge
+########################################################################################################################
+
+cd $(dirname $0)
+. ./env
+
+rm -rf $STAGE_ROOT
+mkdir -p $STAGE_ROOT
+
+mkdir -p $STAGE_ROOT/lisp
+cp ../nfl-*.lisp $STAGE_ROOT/lisp
+cp -r ../data $STAGE_ROOT/data
+cp -r ../make-pngs $STAGE_ROOT
+
+$PODMAN build . -t $IMAGE_TAG
+
