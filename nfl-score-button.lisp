@@ -31,8 +31,9 @@
     (with-slots (game side align size north east south west) button
       (let ( (score (if (eq side :home) (score-home (game-score game)) (score-away (game-score game)))) )
         (let ( (far-off-x (- (+ size east west) 7))
-               (far-off-y (- (+ size north south) 7)) )
-          (draw-text* button east (floor h 2) :x-align :center :y-align :center))))))
+               (far-off-y (- (+ size north south) 7))
+               (score-text (format nil "~d" (apply #'+ score))) )
+          (draw-text* button score-text east (floor h 2) :align-x :left :align-y :center))))))
 
 (defun on-score-button-click (team-button)
   (with-slots (team) team-button
@@ -65,9 +66,10 @@
     (if score
       (let ( (home-score (make-score-button :home game))
              (away-score (make-score-button :home game)) )
-        (make-pane :vbox-pane
+        (make-pane :hbox-pane
                    :min-height +icon-small+
-                   :contents away-score home-score))
+                   :contents (list away-score home-score)))
       (make-pane 'no-score-pane
                  :min-height +icon-small+
+                 :max-height +icon-small+
                  :background (make-rgb-color 0.8 0.7 0.8)))))

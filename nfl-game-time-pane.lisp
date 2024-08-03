@@ -31,29 +31,9 @@
                  (time-text (format nil "~2d:~2,'0d" hours mins))
                  (row (floor h 2))
                  (col (floor w 2)) )
-            (format t "handle-repaint (game-time-pane): text = ~s~%" date-text)
-;           (draw-text* pane "right-bottom" col row
-;                                      :text-size 20
-;                                      :ink (make-rgb-color 0 0 0.8)
-;                                      :x-align :right
-;                                      :y-align :bottom)
-;           (draw-text* pane "left-bottom" col row
-;                                      :text-size 20
-;                                      :ink (make-rgb-color 0 0.8 0)
-;                                      :x-align :left
-;                                      :y-align :bottom)
-;           (draw-text* pane "right-top" col row
-;                                      :text-size 20
-;                                      :ink (make-rgb-color 0 0.8 0.8)
-;                                      :x-align :right
-;                                      :y-align :top)
-;           (draw-text* pane "left-top" col row
-;                                      :text-size 20
-;                                      :ink (make-rgb-color 0.8 0 0.8)
-;                                      :x-align :left
-;                                      :y-align :top)
+;           (format t "handle-repaint (game-time-pane): text = ~s~%" date-text)
             (draw-text* pane date-text col row
-                                       :text-size 20
+                                       :text-size 14
 ;                                      :ink (make-rgb-color 0.3 0.9 0.8)
                                        :x-align :right
                                        :y-align :bottom)))
@@ -66,5 +46,6 @@
     (make-pane 'game-time-pane :date (game-dday game)
 ;                              :background (make-rgb-color 0.9 0.9 0.2)
                                :min-width 200
+                               :max-height +icon-small+
                                :min-height +icon-small+)))
 

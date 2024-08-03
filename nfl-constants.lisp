@@ -11,6 +11,7 @@
 ;; Exports
 ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+(export '+icon-xxsmall+)
 (export '+icon-xsmall+)
 (export '+icon-small+)
 (export '+icon-large+)
@@ -57,10 +58,11 @@
 
 (defconstant +file-root/logos+ "data/static/png")
 
-(defconstant +icon-xsmall+ 32)
-(defconstant +icon-small+  64)
-(defconstant +icon-large+  128)
-(defconstant +icon-xlarge+ 256)
+(defconstant +icon-xxsmall+ 16)
+(defconstant +icon-xsmall+  32)
+(defconstant +icon-small+   64)
+(defconstant +icon-large+   128)
+(defconstant +icon-xlarge+  256)
 
 (defconstant +border-off+ 4)
 (defconstant +border-width+ 4)
