@@ -53,11 +53,11 @@
                                 :airer        airer
                                 :contents     (list ;; Start List
                                                     away-icon
-                                                    away-score
-                                                    home-score
+;                                                   away-score
+;                                                   home-score
                                                     home-icon
-                                                    date-time
-                                                    status
+;                                                   date-time
+;                                                   status
 ;                                                   airer
                                               )))
      (make-instance 'clim-stream-pane)))
