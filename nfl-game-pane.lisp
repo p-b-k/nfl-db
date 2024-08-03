@@ -47,9 +47,9 @@
                                 :contents     (list ;; Start List
                                                     away-icon
                                                     score-pane
-;                                                   home-icon
-;                                                   date-time
+                                                    home-icon
+                                                    date-time
 ;                                                   status
-;                                                   airer
+                                                    airer
                                               )))
      (make-instance 'clim-stream-pane)))
