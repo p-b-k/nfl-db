@@ -24,38 +24,30 @@
   ( (game         :initarg  :game)
     (home-icon    :initarg :home-icon)
     (away-icon    :initarg :away-icon)
-    (home-score   :initarg :home-score)
-    (away-score   :initarg :away-score)
+    (score-pane   :initarg :score-pane)
     (date-time    :initarg :date-time)
     (status       :initarg :status)
-    (airer        :initarg :airer) )
-; (:layouts (default (horizontally () away-icon away-score home-score home-icon)))
-; (:menu-bar nil)
-)
+    (airer        :initarg :airer) ))
 
 (defun make-game-pane (game)
-  (format t "calling make-game-pane on game ~a~%" game)
+; (format t "calling make-game-pane on game ~a~%" game)
   (if game
     (let ( (home-icon    (make-team-icon-pane (home-team game) +icon-small+))
            (away-icon    (make-team-icon-pane (away-team game) +icon-small+))
-           (home-score   (make-score-button game :home))
-           (away-score   (make-score-button game :away))
+           (score-pane   (make-score-pane game))
            (date-time    (make-game-time-pane game))
            (status       (make-status-pane game))
            (airer        (make-airer-pane game)) )
       (make-instance 'game-pane :game         game
                                 :home-icon    home-icon
-                                :away-icon    away-icon
-                                :home-score   home-score
-                                :away-score   away-score
+                                :score-pane   score-pane
                                 :date-time    date-time
                                 :status       status
                                 :airer        airer
                                 :contents     (list ;; Start List
                                                     away-icon
-;                                                   away-score
-;                                                   home-score
-                                                    home-icon
+                                                    score-pane
+;                                                   home-icon
 ;                                                   date-time
 ;                                                   status
 ;                                                   airer
