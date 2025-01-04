@@ -26,15 +26,20 @@
       (if date
         (multiple-value-bind (secs mins hours day month year day-of-week dst tz)
                              (decode-universal-time date)
-          (let ( (day-text  (aref +days-of-week+ day-of-week))
-                 (date-text (format nil "~a ~a" (aref +months+ (- month 1)) day))
-                 (time-text (format nil "~2d:~2,'0d" hours mins))
-                 (row (floor h 2))
-                 (col (floor w 2)) )
+          (let ( (date-text (format nil "~a, ~a ~a" (aref +days-of-week+ day-of-week) (aref +months+ (- month 1)) day))
+                 (time-text (format nil "~2d:~2,'0d ~a" (if (< hours 13) hours (- hours 12))
+                                                        mins
+                                                        (if (< hours 13) 'am 'pm)))
+                 (date-row (floor h 3))
+                 (time-row (floor (* 2 h) 3))
+                 (col 20) )
 ;           (format t "handle-repaint (game-time-pane): text = ~s~%" date-text)
-            (draw-text* pane date-text col row
+            (draw-text* pane date-text col date-row
                                        :text-size 14
-;                                      :ink (make-rgb-color 0.3 0.9 0.8)
+                                       :x-align :right
+                                       :y-align :bottom)
+            (draw-text* pane time-text col time-row
+                                       :text-size 14
                                        :x-align :right
                                        :y-align :bottom)))
         (draw-text* pane "TBD" (floor 2 w) (floor 2 h)

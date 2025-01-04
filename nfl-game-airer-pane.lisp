@@ -24,19 +24,20 @@
   (let ( (w (bounding-rectangle-width  pane))
          (h (bounding-rectangle-height pane)) )
     (with-slots (airer) pane
-      (if (cdr airer)
-        (let ( (primary (car airer))
-               (secondary (car (cdr airer))) )
-            (let ( (airer-icon-file-1 (airer-logo-file primary +icon-xxsmall+))
-                   (airer-icon-file-2 (airer-logo-file secondary +icon-xxsmall+)) )
-                (let ( (icon-1 (make-pattern-from-bitmap-file airer-icon-file-1))
-                       (icon-2 (make-pattern-from-bitmap-file airer-icon-file-2)) )
-                (draw-image* pane icon-1 (- w +game-airer-info-x-offset+) (+ +game-list-item-top-border-size+
-                                                                             (/ +icon-xxsmall+ 2)))
-                (draw-image* pane icon-2 (- w (* 2 +game-airer-info-x-offset+)) (+ +game-list-item-top-border-size+
-                                                                                         (/ +icon-xxsmall+ 2))))))
-        (let ( (airer-icon-file (airer-logo-file (car airer) +icon-xxsmall+)) )
-          (let ( (airer-icon (make-pattern-from-bitmap-file airer-icon-file)) )
-            (draw-image* pane airer-icon (- w +game-airer-info-x-offset+) (+ +game-list-item-top-border-size+
-                                                                          (/ +icon-xxsmall+ 2)))))))))
+      (if airer
+        (if (cdr airer)
+          (let ( (primary (car airer))
+                 (secondary (car (cdr airer))) )
+              (let ( (airer-icon-file-1 (airer-logo-file primary +icon-xsmall+))
+                     (airer-icon-file-2 (airer-logo-file secondary +icon-xsmall+)) )
+                  (let ( (icon-1 (make-pattern-from-bitmap-file airer-icon-file-1))
+                         (icon-2 (make-pattern-from-bitmap-file airer-icon-file-2)) )
+                  (draw-image* pane icon-1 (- w +game-airer-info-x-offset+) (+ +game-list-item-top-border-size+
+                                                                               (/ +icon-xsmall+ 2)))
+                  (draw-image* pane icon-2 (- w (* 2 +game-airer-info-x-offset+)) (+ +game-list-item-top-border-size+
+                                                                                           (/ +icon-xsmall+ 2))))))
+          (let ( (airer-icon-file (airer-logo-file (car airer) +icon-xsmall+)) )
+            (let ( (airer-icon (make-pattern-from-bitmap-file airer-icon-file)) )
+              (draw-image* pane airer-icon (- w +game-airer-info-x-offset+) (+ +game-list-item-top-border-size+
+                                                                            (/ +icon-xsmall+ 2))))))))))
 

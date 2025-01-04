@@ -48,7 +48,7 @@
                                                     away-icon
                                                     score-pane
                                                     home-icon
-                                                    date-time
+;                                                   date-time
 ;                                                   status
                                                     airer
                                               )))
